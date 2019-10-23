@@ -1,6 +1,7 @@
 ﻿using System;
 using NSubstitute;
 using NUnit.Framework;
+using Octopus.Diagnostics;
 using Octopus.Server.Extensibility.Extensions;
 using Octopus.Server.Extensibility.HostServices.Model.BuildInformation;
 using Octopus.Server.Extensibility.HostServices.Model.IssueTrackers;
@@ -29,7 +30,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var links = CreateWorkItemLinkMapper(false).Map(new OctopusBuildInformation
             {
                 BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"
-            });
+            }, Substitute.For<ILogWithContext>());
             Assert.IsTrue(links.Succeeded);
             Assert.IsNull(links.Value);
         }
