@@ -9,6 +9,7 @@ using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
 using Octopus.Server.Extensibility.Resources.IssueTrackers;
+using Octopus.Versioning.Semver;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 {
@@ -27,7 +28,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
         [Test]
         public void WhenDisabledReturnsNull()
         {
-            var links = CreateWorkItemLinkMapper(false).Map(new OctopusBuildInformation
+            var links = CreateWorkItemLinkMapper(false).Map("Deployable", new SemanticVersion("1.0"), new OctopusBuildInformation
             {
                 BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"
             }, Substitute.For<ILogWithContext>());

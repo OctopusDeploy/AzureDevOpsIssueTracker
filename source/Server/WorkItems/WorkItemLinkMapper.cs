@@ -5,6 +5,7 @@ using Octopus.Server.Extensibility.HostServices.Model.BuildInformation;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.Resources.IssueTrackers;
+using Octopus.Versioning;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
 {
@@ -22,7 +23,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
         public string CommentParser => AzureDevOpsConfigurationStore.CommentParser;
         public bool IsEnabled => store.GetIsEnabled();
 
-        public SuccessOrErrorResult<WorkItemLink[]> Map(OctopusBuildInformation buildInformation, ILogWithContext log)
+        public SuccessOrErrorResult<WorkItemLink[]> Map(string packageId, IVersion version, OctopusBuildInformation buildInformation, ILogWithContext log)
         {
             // For ADO, we should ignore anything that wasn't built by ADO because we get work items from the build
             if (!IsEnabled
