@@ -13,12 +13,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
     public class WorkItemLinkMapper : IWorkItemLinkMapper
     {
         private readonly IAzureDevOpsConfigurationStore store;
-        private readonly IAdoApiClient client;
+        private readonly IAdoApiClientFactory clientFactory;
 
-        public WorkItemLinkMapper(IAzureDevOpsConfigurationStore store, IAdoApiClient client)
+        public WorkItemLinkMapper(IAzureDevOpsConfigurationStore store, IAdoApiClientFactory clientFactory)
         {
             this.store = store;
-            this.client = client;
+            this.clientFactory = clientFactory;
         }
 
         public string CommentParser => AzureDevOpsConfigurationStore.CommentParser;
@@ -56,7 +56,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
 
             try
             {
-                return client.GetBuildWorkItemLinks(AdoBuildUrls.ParseBrowserUrl(buildInformation.BuildUrl));
+                return clientFactory.CreateWithLog(log).GetBuildWorkItemLinks(AdoBuildUrls.ParseBrowserUrl(buildInformation.BuildUrl));
             }
             catch (Exception ex)
             {

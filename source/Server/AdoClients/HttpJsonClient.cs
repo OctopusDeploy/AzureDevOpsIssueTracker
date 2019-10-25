@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json.Linq;
+using Octopus.Diagnostics;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
@@ -51,7 +52,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
     public sealed class HttpJsonClient : IHttpJsonClient
     {
+        private readonly ILogWithContext log;
         private readonly HttpClient httpClient = new HttpClient();
+
+        public HttpJsonClient(ILogWithContext log)
+        {
+            this.log = log;
+        }
 
         public (HttpJsonClientStatus status, JObject jObject) Get(string url, string basicPassword = null)
         {
@@ -62,6 +69,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 request.Headers.Authorization = new AuthenticationHeaderValue("Basic",
                     Convert.ToBase64String(Encoding.UTF8.GetBytes(":" + basicPassword)));
             }
+
+            log.Trace($"Azure DevOps client request: GET {url} ({(string.IsNullOrEmpty(basicPassword) ? "unauthenticated" : "authenticated")})");
 
             HttpResponseMessage response;
             try
