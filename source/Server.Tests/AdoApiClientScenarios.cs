@@ -13,7 +13,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
     [TestFixture]
     public class AdoApiClientScenarios
     {
-        private static readonly HtmlConvert HtmlConvert = new HtmlConvert(Substitute.For<ILog>());
+        private static readonly ILogWithContext Log = Substitute.For<ILogWithContext>();
+        private static readonly HtmlConvert HtmlConvert = new HtmlConvert(Log);
 
         private static IAzureDevOpsConfigurationStore CreateSubstituteStore()
         {
@@ -36,7 +37,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
                 .Returns((HttpStatusCode.OK,
                     JObject.Parse(@"{""id"":2,""fields"":{""System.CommentCount"":0,""System.Title"": ""README has no useful content""}}")));
 
-            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
+            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert, Log).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
 
             Assert.IsTrue(workItemLinks.Succeeded);
@@ -46,7 +47,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             Assert.AreEqual("README has no useful content", workItemLink.Description);
         }
 
-        
         [Test]
         public void SourceGetsSet()
         {
@@ -59,7 +59,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
                 .Returns((HttpStatusCode.OK,
                     JObject.Parse(@"{""id"":2,""fields"":{""System.CommentCount"":0,""System.Title"": ""README has no useful content""}}")));
 
-            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
+            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert, Log).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
 
             Assert.IsTrue(workItemLinks.Succeeded);
@@ -82,7 +82,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
                 .Returns((HttpStatusCode.OK, JObject.Parse(@"{""totalCount"":3,""count"":3,""comments"":[{""text"":""= Changelog = N/A""}," +
                                                            @"{""text"":""<div>= Changelog =&nbsp;README <i>riddle</i> now has an answer!</div>""},{""text"":""See also related issue.""}]}")));
 
-            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
+            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert, Log).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=28"));
 
             Assert.IsTrue(workItemLinks.Succeeded);
@@ -111,7 +111,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             httpJsonClient.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/wit/workitems/6/comments?api-version=5.0-preview.2", "rumor")
                 .Returns((HttpStatusCode.InternalServerError, null));
 
-            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
+            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert, Log).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=29"));
 
             Assert.IsFalse(workItemLinks.Succeeded);
@@ -139,12 +139,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
                 });
 
             // Request to other host should not include password
-            new AdoApiClient(store, httpJsonClient, HtmlConvert)
+            new AdoApiClient(store, httpJsonClient, HtmlConvert, Log)
                 .GetBuildWorkItemsRefs(AdoBuildUrls.ParseBrowserUrl("http://someotherhost/DefaultCollection/Deployable/_build/results?buildId=24"));
             Assert.IsNull(passwordSent);
 
             // Request to origin should include password
-            new AdoApiClient(store, httpJsonClient, HtmlConvert)
+            new AdoApiClient(store, httpJsonClient, HtmlConvert, Log)
                 .GetBuildWorkItemsRefs(AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
             Assert.AreEqual("rumor", passwordSent);
         }
@@ -158,7 +158,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
                 .Returns((HttpStatusCode.NotFound,
                     JObject.Parse(@"{""$id"":""1"",""message"":""The requested build 7 could not be found."",""errorCode"":0,""eventId"":3000}")));
 
-            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
+            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert, Log).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=7"));
 
             Assert.IsTrue(workItemLinks.Succeeded);
@@ -177,7 +177,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
                 .Returns((HttpStatusCode.NotFound,
                     JObject.Parse(@"{""$id"":""1"",""message"":""TF401232: Work item 999 does not exist."",""errorCode"":0,""eventId"":3200}")));
 
-            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
+            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert, Log).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=8"));
 
             Assert.IsTrue(workItemLinks.Succeeded);

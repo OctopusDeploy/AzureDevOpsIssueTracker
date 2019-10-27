@@ -22,7 +22,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
         public IAdoApiClient CreateWithLog(ILogWithContext log)
         {
-            return new AdoApiClient(store, new HttpJsonClient(log), htmlConvert);
+            return new AdoApiClient(store, new HttpJsonClient(log), htmlConvert, log);
         }
     }
 }

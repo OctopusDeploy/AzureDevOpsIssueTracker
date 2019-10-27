@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
+using Octopus.Diagnostics;
 using Octopus.Server.Extensibility.Extensions;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
@@ -12,7 +13,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
     public interface IAdoApiClient
     {
-        SuccessOrErrorResult<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls);
+        SuccessOrErrorResult<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls, string buildNumber = null);
     }
 
     public class AdoApiClient : IAdoApiClient
@@ -22,12 +23,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         private readonly IAzureDevOpsConfigurationStore store;
         private readonly IHttpJsonClient client;
         private readonly HtmlConvert htmlConvert;
+        private readonly ILogWithContext log;
 
-        public AdoApiClient(IAzureDevOpsConfigurationStore store, IHttpJsonClient client, HtmlConvert htmlConvert)
+        public AdoApiClient(IAzureDevOpsConfigurationStore store, IHttpJsonClient client, HtmlConvert htmlConvert, ILogWithContext log)
         {
             this.store = store;
             this.client = client;
             this.htmlConvert = htmlConvert;
+            this.log = log;
         }
 
         internal string GetPersonalAccessToken(AdoUrl adoUrl)
@@ -184,12 +187,19 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             return SuccessOrErrorResult.Conditional(workItemLink, workItem, releaseNote);
         }
 
-        public SuccessOrErrorResult<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls)
+        public SuccessOrErrorResult<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls, string buildNumber = null)
         {
             var workItemsRefs = GetBuildWorkItemsRefs(adoBuildUrls);
             if (!workItemsRefs.Succeeded)
             {
                 return SuccessOrErrorResult.Failure(workItemsRefs);
+            }
+
+            if (!workItemsRefs.Value.Any())
+            {
+                log.Trace($"No associated work items were found in Azure DevOps for build '{buildNumber}'.");
+                log.Trace("Work items can be linked when editing an open pull request, or by editing a work item and linking a build / commit / pull request,"
+                          + " or by mentioning a work item in a commit message. For more information, see https://g.octopushq.com/AzureDevOpsIssueTracker");
             }
 
             var workItemLinks = workItemsRefs.Value
