@@ -56,7 +56,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
 
             try
             {
-                return clientFactory.CreateWithLog(log).GetBuildWorkItemLinks(AdoBuildUrls.ParseBrowserUrl(buildInformation.BuildUrl), buildInformation.BuildNumber);
+                return clientFactory.CreateWithLog(log).GetBuildWorkItemLinks(AdoBuildUrls.ParseBrowserUrl(buildInformation.BuildUrl), $"{packageId} build {buildInformation.BuildNumber}");
             }
             catch (Exception ex)
             {

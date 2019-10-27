@@ -16,6 +16,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
     public class AdoBuildUrls : AdoProjectUrls
     {
+        public string BuildSummaryUrl { get; set; }
         public int BuildId { get; set; }
 
         public static AdoBuildUrls ParseBrowserUrl(string browserUrl)
@@ -31,11 +32,16 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                     throw ParseError();
                 }
 
+                var browserUri = new Uri(browserUrl, UriKind.Absolute);
+                var summaryQuery = browserUri.ParseQueryString();
+                summaryQuery["view"] = "results";
+
                 return new AdoBuildUrls
                 {
                     OrganizationUrl = prefixMatch.Groups[2].Value,
                     ProjectUrl = prefixMatch.Groups[1].Value,
-                    BuildId = int.Parse(new Uri(browserUrl, UriKind.Absolute).ParseQueryString()["buildId"])
+                    BuildSummaryUrl = new UriBuilder(browserUri) {Query = summaryQuery.ToString()}.ToString(),
+                    BuildId = int.Parse(browserUri.ParseQueryString()["buildId"])
                 };
             }
             catch (Exception ex)
