@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json.Linq;
+using Octopus.Server.Extensibility.Extensions.Infrastructure.Web.Api;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
@@ -19,8 +20,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
     public sealed class HttpJsonClient : IHttpJsonClient
     {
-        private readonly HttpClient httpClient = new HttpClient();
+        private readonly HttpClient httpClient;
 
+        public HttpJsonClient(IOctopusHttpClientFactory octopusHttpClientFactory)
+        {
+            httpClient = octopusHttpClientFactory.CreateClient();
+        }
+        
         public (HttpStatusCode status, JObject jObject) Get(string url, string basicPassword = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
