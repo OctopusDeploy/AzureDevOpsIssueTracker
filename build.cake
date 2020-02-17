@@ -110,11 +110,7 @@ Task("__Pack")
         CreateDirectory(extPublishDir);
         CopyFileToDirectory(Path.Combine("BuildAssets", "Server.nuspec"), extPublishDir);
 
-		CopyFiles(Path.Combine("source", "Server", "bin", "Release", "net452", $"*.{extensionName}.dll"), extPublishDir);
-		CopyFiles(Path.Combine("source", "Server", "bin", "Release", "net452", $"HtmlAgilityPack.dll"), extPublishDir);
-		CopyFiles(Path.Combine("source", "Server", "bin", "Release", "net452", $"System.Net.Http.Extensions.dll"), extPublishDir);
-		CopyFiles(Path.Combine("source", "Server", "bin", "Release", "net452", $"System.Net.Http.Formatting.dll"), extPublishDir);
-		CopyFiles(Path.Combine("source", "Server", "bin", "Release", "net452", $"System.Net.Http.Primitives.dll"), extPublishDir);
+		CopyFiles(Path.Combine("source", "Server", "bin", "Release", "net452", $"*.dll"), extPublishDir);
 
         NuGetPack(Path.Combine(extPublishDir, "Server.nuspec"), new NuGetPackSettings {
             Version = nugetVersion,
