@@ -112,7 +112,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
         }
     }
 
-    public class ConnectionCheckData
+    class ConnectionCheckData
     {
         public string BaseUrl { get; set; }
         public string PersonalAccessToken { get; set; } 
