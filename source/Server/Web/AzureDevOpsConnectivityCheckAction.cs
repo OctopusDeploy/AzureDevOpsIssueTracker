@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using Octopus.Data.Model;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Web.Api;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
@@ -12,6 +11,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 {
     class AzureDevOpsConnectivityCheckAction : IAsyncApiAction
     {
+        static readonly RequestBodyRegistration<ConnectionCheckData> Data = new RequestBodyRegistration<ConnectionCheckData>();
+        static readonly OctopusJsonRegistration<ConnectivityCheckResponse> Result = new OctopusJsonRegistration<ConnectivityCheckResponse>();
+        
         private readonly IAzureDevOpsConfigurationStore configurationStore;
         private readonly IAdoApiClient adoApiClient;
 
@@ -21,19 +23,19 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
             this.adoApiClient = adoApiClient;
         }
 
-        public async Task<OctoResponse> ExecuteAsync(IOctoRequest request)
+        public Task<IOctoResponseProvider> ExecuteAsync(IOctoRequest request)
         {
             var connectivityCheckResponse = new ConnectivityCheckResponse();
 
             try
             {
-                var requestData = request.GetBody<JObject>();
+                var requestData = request.GetBody(Data);
 
-                var baseUrl = requestData.GetValue("BaseUrl").ToString();
+                var baseUrl = requestData.BaseUrl;
                 // If PersonalAccessToken here is null, it could be that they're clicking the test connectivity button after saving
                 // the configuration as we won't have the value of the PersonalAccessToken on client side, so we need to retrieve it
                 // from the database
-                var personalAccessToken = requestData.GetValue("PersonalAccessToken").ToString().ToSensitiveString();
+                var personalAccessToken = requestData.PersonalAccessToken.ToSensitiveString();
                 if (string.IsNullOrEmpty(personalAccessToken.Value))
                 {
                     personalAccessToken = configurationStore.GetPersonalAccessToken();
@@ -42,7 +44,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 if (string.IsNullOrEmpty(baseUrl))
                 {
                     connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, "Please provide a value for Azure DevOps Base Url.");
-                    return new OctoDataResponse(connectivityCheckResponse);
+                    return Task.FromResult(Result.Response(connectivityCheckResponse));
                 }
 
                 var urls = AdoProjectUrls.ParseOrganizationAndProjectUrls(baseUrl);
@@ -57,13 +59,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                     if (!projects.Succeeded)
                     {
                         connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, projects.FailureReason);
-                        return new OctoDataResponse(connectivityCheckResponse);
+                        return Task.FromResult(Result.Response(connectivityCheckResponse));
                     }
 
                     if (!projects.Value.Any())
                     {
                         connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, "Successfully connected, but unable to find any projects to test permissions.");
-                        return new OctoDataResponse(connectivityCheckResponse);
+                        return Task.FromResult(Result.Response(connectivityCheckResponse));
                     }
 
                     projectUrls = projects.Value.Select(project => new AdoProjectUrls
@@ -97,16 +99,22 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                         connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Info, "The Jira Issue Tracker is not enabled, so its functionality will not currently be available");
                     }
 
-                    return new OctoDataResponse(connectivityCheckResponse);
+                    return Task.FromResult(Result.Response(connectivityCheckResponse));
                 }
 
-                return new OctoDataResponse(connectivityCheckResponse);
+                return Task.FromResult(Result.Response(connectivityCheckResponse));
             }
             catch (Exception ex)
             {
                 connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, ex.ToString());
-                return new OctoDataResponse(connectivityCheckResponse);
+                return Task.FromResult(Result.Response(connectivityCheckResponse));
             }
         }
+    }
+
+    public class ConnectionCheckData
+    {
+        public string BaseUrl { get; set; }
+        public string PersonalAccessToken { get; set; } 
     }
 }
