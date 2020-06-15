@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests</AssemblyName>
     <RootNamespace>Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests</RootNamespace>
   </PropertyGroup>
@@ -13,7 +13,7 @@
     <PackageReference Include="NUnit" Version="3.11.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
     <PackageReference Include="Octopus.Diagnostics" Version="1.3.0" />
-    <PackageReference Include="Octopus.Server.Extensibility" Version="9.0.7-enh-nancyparams0017" />
+    <PackageReference Include="Octopus.Server.Extensibility" Version="9.1.0-enh-nancyparams0053" />
     <PackageReference Include="TeamCity.VSTest.TestAdapter" Version="1.0.15" />
   </ItemGroup>
 
