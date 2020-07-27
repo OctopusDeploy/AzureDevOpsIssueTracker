@@ -12,7 +12,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
     {
         public HttpStatusCode HttpStatusCode { get; set; }
         public bool SignInPage { get; set; }
-        public string ErrorMessage { get; set; }
+        public string ErrorMessage { get; set; } = string.Empty;
 
         public bool IsSuccessStatusCode()
         {
@@ -20,7 +20,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                    && HttpStatusCode <= (HttpStatusCode) 299;
         }
 
-        public string ToDescription(JObject jObject = null, bool disableSettingsHints = false)
+        public string ToDescription(JObject? jObject = null, bool disableSettingsHints = false)
         {
             if (!string.IsNullOrWhiteSpace(ErrorMessage))
             {
@@ -55,7 +55,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
     interface IHttpJsonClient : IDisposable
     {
-        (HttpJsonClientStatus status, JObject jObject) Get(string url, string basicPassword = null);
+        (HttpJsonClientStatus status, JObject? jObject) Get(string url, string? basicPassword = null);
     }
 
     sealed class HttpJsonClient : IHttpJsonClient
@@ -69,7 +69,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             httpClient = octopusHttpClientFactory.CreateClient();
         }
         
-        public (HttpJsonClientStatus status, JObject jObject) Get(string url, string basicPassword = null)
+        public (HttpJsonClientStatus status, JObject? jObject) Get(string url, string? basicPassword = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -109,8 +109,11 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
         }
 
-        private JObject ParseJsonOrDefault(HttpContent httpContent)
+        private JObject? ParseJsonOrDefault(HttpContent? httpContent)
         {
+            if (httpContent == null)
+                return null;
+            
             try
             {
                 return JObject.Parse(httpContent.ReadAsStringAsync().GetAwaiter().GetResult());

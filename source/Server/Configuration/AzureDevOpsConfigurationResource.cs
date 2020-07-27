@@ -16,7 +16,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         [Description(BaseUrlDescription)]
         [Required]
         [Writeable]
-        public string BaseUrl { get; set; }
+        public string? BaseUrl { get; set; }
 
         public const string PersonalAccessTokenDescription =
             "A Personal Access Token (PAT) authorized to read scopes 'Build' and 'Work items', added under User Settings.";
@@ -25,7 +25,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         [Description(PersonalAccessTokenDescription)]
         [Writeable]
         [AllowConnectivityCheck("Azure DevOps configuration", AzureDevOpsIssueTrackerApi.ApiConnectivityCheck, nameof(BaseUrl), nameof(PersonalAccessToken))]
-        public SensitiveValue PersonalAccessToken { get; set; }
+        public SensitiveValue? PersonalAccessToken { get; set; }
 
         [DisplayName("Release Note Options")]
         public ReleaseNoteOptionsResource ReleaseNoteOptions { get; set; } = new ReleaseNoteOptionsResource();
@@ -39,6 +39,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         [DisplayName("Release Note Prefix")]
         [Description(ReleaseNotePrefixDescription)]
         [Writeable]
-        public string ReleaseNotePrefix { get; set; }
+        public string? ReleaseNotePrefix { get; set; }
     }
 }

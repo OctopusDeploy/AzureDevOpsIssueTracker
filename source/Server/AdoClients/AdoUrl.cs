@@ -6,12 +6,21 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
     class AdoUrl
     {
-        public string OrganizationUrl { get; set; }
+        public AdoUrl(string organizationUrl)
+        {
+            OrganizationUrl = organizationUrl;
+        }
+
+        public string OrganizationUrl { get; }
     }
 
     class AdoProjectUrls : AdoUrl
     {
-        public string ProjectUrl { get; set; }
+        public AdoProjectUrls(string organizationUrl) : base(organizationUrl)
+        {
+        }
+
+        public string? ProjectUrl { get; set; }
 
         public static AdoProjectUrls ParseOrganizationAndProjectUrls(string organizationOrProjectUrl)
         {
@@ -23,9 +32,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                         is Match match && match.Success)
                 {
                     var orgUri = new Uri(uri, $"/{match.Groups["org"].Value}");
-                    return new AdoProjectUrls
+                    return new AdoProjectUrls(orgUri.AbsoluteUri)
                     {
-                        OrganizationUrl = orgUri.AbsoluteUri,
                         ProjectUrl = match.Groups["proj"].Success
                             ? $"{orgUri.AbsoluteUri}/{match.Groups["proj"].Value}"
                             : null
@@ -47,9 +55,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
                 var organizationUrl = new Uri(uri, collectionPath).AbsoluteUri;
 
-                return new AdoProjectUrls
+                return new AdoProjectUrls(organizationUrl)
                 {
-                    OrganizationUrl = organizationUrl,
                     ProjectUrl = projectIsSpecified
                         ? new Uri(uri, match.Value).AbsoluteUri
                         : null
@@ -60,11 +67,16 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
     class AdoBuildUrls : AdoProjectUrls
     {
+        public AdoBuildUrls(string organizationUrl, int buildId) : base(organizationUrl)
+        {
+            BuildId = buildId;
+        }
+
         public int BuildId { get; set; }
 
         public static AdoBuildUrls ParseBrowserUrl(string browserUrl)
         {
-            ArgumentException ParseError(Exception innerException = null)
+            ArgumentException ParseError(Exception? innerException = null)
                 => new ArgumentException("Unrecognized build browse URL.", nameof(browserUrl), innerException);
 
             try
@@ -78,11 +90,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 var fullUri = new Uri(browserUrl);
                 var queryParams = HttpUtility.ParseQueryString(fullUri.Query);
                 var buildId = queryParams["buildId"];
-                return new AdoBuildUrls
+                return new AdoBuildUrls(prefixMatch.Groups[2].Value, int.Parse(buildId))
                 {
-                    OrganizationUrl = prefixMatch.Groups[2].Value,
-                    ProjectUrl = prefixMatch.Groups[1].Value,
-                    BuildId = int.Parse(buildId)
+                    ProjectUrl = prefixMatch.Groups[1].Value
                 };
             }
             catch (Exception ex)
@@ -93,7 +103,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
         public static AdoBuildUrls Create(AdoProjectUrls adoProjectUrls, int buildId)
         {
-            return new AdoBuildUrls {OrganizationUrl = adoProjectUrls.OrganizationUrl, ProjectUrl = adoProjectUrls.ProjectUrl, BuildId = buildId};
+            return new AdoBuildUrls(adoProjectUrls.OrganizationUrl, buildId) { ProjectUrl = adoProjectUrls.ProjectUrl };
         }
     }
 }

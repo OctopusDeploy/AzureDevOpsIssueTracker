@@ -9,15 +9,15 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         {
         }
 
-        public string BaseUrl { get; set; }
+        public string? BaseUrl { get; set; }
 
-        public SensitiveString PersonalAccessToken { get; set; }
+        public SensitiveString? PersonalAccessToken { get; set; }
 
         public ReleaseNoteOptions ReleaseNoteOptions { get; set; } = new ReleaseNoteOptions();
     }
 
     class ReleaseNoteOptions
     {
-        public string ReleaseNotePrefix { get; set; }
+        public string? ReleaseNotePrefix { get; set; }
     }
 }

@@ -5,12 +5,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
     interface IAzureDevOpsConfigurationStore : IExtensionConfigurationStore<AzureDevOpsConfiguration>
     {
-        string GetBaseUrl();
-        void SetBaseUrl(string baseUrl);
+        string? GetBaseUrl();
+        void SetBaseUrl(string? baseUrl);
 
-        SensitiveString GetPersonalAccessToken();
-        void SetPersonalAccessToken(SensitiveString value);
-        string GetReleaseNotePrefix();
-        void SetReleaseNotePrefix(string releaseNotePrefix);
+        SensitiveString? GetPersonalAccessToken();
+        void SetPersonalAccessToken(SensitiveString? value);
+        string? GetReleaseNotePrefix();
+        void SetReleaseNotePrefix(string? releaseNotePrefix);
     }
 }

@@ -16,19 +16,19 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 
         public override string Id => SingletonId;
 
-        public string GetBaseUrl()
+        public string? GetBaseUrl()
         {
             return GetProperty(doc => doc.BaseUrl?.Trim('/'));
         }
 
-        public void SetBaseUrl(string baseUrl)
+        public void SetBaseUrl(string? baseUrl)
         {
             SetProperty(doc => doc.BaseUrl = baseUrl?.Trim('/'));
         }
 
-        public SensitiveString GetPersonalAccessToken() => GetProperty(doc => doc.PersonalAccessToken);
-        public void SetPersonalAccessToken(SensitiveString value) => SetProperty(doc => doc.PersonalAccessToken = value);
-        public string GetReleaseNotePrefix() => GetProperty(doc => doc.ReleaseNoteOptions.ReleaseNotePrefix);
-        public void SetReleaseNotePrefix(string releaseNotePrefix) => SetProperty(doc => doc.ReleaseNoteOptions.ReleaseNotePrefix = releaseNotePrefix);
+        public SensitiveString? GetPersonalAccessToken() => GetProperty(doc => doc.PersonalAccessToken);
+        public void SetPersonalAccessToken(SensitiveString? value) => SetProperty(doc => doc.PersonalAccessToken = value);
+        public string? GetReleaseNotePrefix() => GetProperty(doc => doc.ReleaseNoteOptions.ReleaseNotePrefix);
+        public void SetReleaseNotePrefix(string? releaseNotePrefix) => SetProperty(doc => doc.ReleaseNoteOptions.ReleaseNotePrefix = releaseNotePrefix);
     }
 }

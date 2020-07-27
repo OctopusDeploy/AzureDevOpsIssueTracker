@@ -19,6 +19,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
 
         public bool IsEnabled => configurationStore.GetIsEnabled();
 
-        public string BaseUrl => configurationStore.GetIsEnabled() ? configurationStore.GetBaseUrl() : null;
+        public string? BaseUrl => configurationStore.GetIsEnabled() ? configurationStore.GetBaseUrl() : null;
     }
 }

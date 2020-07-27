@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Octopus.Data;
 using Octopus.Data.Model;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Web.Api;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
@@ -13,7 +14,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
     {
         static readonly RequestBodyRegistration<ConnectionCheckData> Data = new RequestBodyRegistration<ConnectionCheckData>();
         static readonly OctopusJsonRegistration<ConnectivityCheckResponse> Result = new OctopusJsonRegistration<ConnectivityCheckResponse>();
-        
+
         private readonly IAzureDevOpsConfigurationStore configurationStore;
         private readonly IAdoApiClient adoApiClient;
 
@@ -55,12 +56,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 }
                 else
                 {
-                    var projects = adoApiClient.GetProjectList(urls, personalAccessToken.Value, true);
-                    if (!projects.Succeeded)
+                    var projectsResult = adoApiClient.GetProjectList(urls, personalAccessToken?.Value, true);
+                    if (projectsResult is FailureResult failure)
                     {
-                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, projects.FailureReason);
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, failure.ErrorString);
                         return Task.FromResult(Result.Response(connectivityCheckResponse));
                     }
+
+                    var projects = (ISuccessResult<string[]>) projectsResult;
 
                     if (!projects.Value.Any())
                     {
@@ -68,26 +71,25 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                         return Task.FromResult(Result.Response(connectivityCheckResponse));
                     }
 
-                    projectUrls = projects.Value.Select(project => new AdoProjectUrls
+                    projectUrls = projects.Value.Select(project => new AdoProjectUrls(urls.OrganizationUrl)
                     {
-                        OrganizationUrl = urls.OrganizationUrl,
                         ProjectUrl = $"{urls.OrganizationUrl}/{project}"
                     }).ToArray();
                 }
 
                 foreach (var projectUrl in projectUrls)
                 {
-                    var buildScopeTest = adoApiClient.GetBuildWorkItemsRefs(AdoBuildUrls.Create(projectUrl, 1), personalAccessToken.Value, true);
-                    if (!buildScopeTest.Succeeded)
+                    var buildScopeTest = adoApiClient.GetBuildWorkItemsRefs(AdoBuildUrls.Create(projectUrl, 1), personalAccessToken?.Value, true);
+                    if (buildScopeTest is FailureResult buildScopeFailure)
                     {
-                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, buildScopeTest.FailureReason);
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, buildScopeFailure.ErrorString);
                         continue;
                     }
 
-                    var workItemScopeTest = adoApiClient.GetWorkItem(projectUrl, 1, personalAccessToken.Value, true);
-                    if (!workItemScopeTest.Succeeded)
+                    var workItemScopeTest = adoApiClient.GetWorkItem(projectUrl, 1, personalAccessToken?.Value, true);
+                    if (workItemScopeTest is FailureResult workItemScopeFailure)
                     {
-                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, workItemScopeTest.FailureReason);
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, workItemScopeFailure.ErrorString);
                         continue;
                     }
 
@@ -115,6 +117,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
     class ConnectionCheckData
     {
         public string BaseUrl { get; set; }
-        public string PersonalAccessToken { get; set; } 
+        public string PersonalAccessToken { get; set; }
     }
 }

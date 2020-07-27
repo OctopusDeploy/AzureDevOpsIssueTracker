@@ -10,13 +10,15 @@
     <PackageIconUrl>http://i.octopusdeploy.com/resources/Avatar3_360.png</PackageIconUrl>
     <PackageLicenseUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker/blob/master/LICENSE.txt</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</PackageProjectUrl>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>true</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.11.4" />
-    <PackageReference Include="Octopus.Data" Version="5.0.3" />
-    <PackageReference Include="Octopus.Diagnostics" Version="1.3.0" />
-    <PackageReference Include="Octopus.Server.Extensibility" Version="9.0.10-enh-nancyparams0041" />
+    <PackageReference Include="Octopus.Data" Version="5.1.3" />
+    <PackageReference Include="Octopus.Diagnostics" Version="1.3.5" />
+    <PackageReference Include="Octopus.Server.Extensibility" Version="10.0.5-enh-nancyparams0025" />
   </ItemGroup>
 
 </Project>
