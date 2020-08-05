@@ -10,7 +10,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
 
         public AzureDevOpsIssueTrackerApi()
         {
-            Add<AzureDevOpsConnectivityCheckAction>("POST", ApiConnectivityCheck, RouteCategory.Raw, new SecuredEndpointInvocation());
+            Add<AzureDevOpsConnectivityCheckAction>("POST", ApiConnectivityCheck, RouteCategory.Raw, new SecuredEndpointInvocation(), null, "AzureDevOps");
         }
     }
 }
