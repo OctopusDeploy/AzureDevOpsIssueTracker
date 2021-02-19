@@ -14,6 +14,7 @@ using Octopus.Server.Extensibility.Results;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
+    //TODO: May consider replacing this client with the Microsoft.TeamFoundationServer.Client, please refer to https://docs.microsoft.com/en-us/azure/devops/integrate/concepts/dotnet-client-libraries?view=azure-devops
     interface IAdoApiClient
     {
         IResultFromExtension<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, string? personalAccessToken = null, bool testing = false);
