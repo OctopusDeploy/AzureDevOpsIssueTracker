@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Web.Api;
@@ -56,6 +57,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
     interface IHttpJsonClient : IDisposable
     {
         (HttpJsonClientStatus status, JObject? jObject) Get(string url, string? basicPassword = null);
+
+        (HttpJsonClientStatus status, JObject? jObject) Post(string url, string? jsonBody = null, string? basicPassword = null);
     }
 
     sealed class HttpJsonClient : IHttpJsonClient
@@ -71,14 +74,35 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         
         public (HttpJsonClientStatus status, JObject? jObject) Get(string url, string? basicPassword = null)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var request = CreateHttpRequestMessage(url, HttpMethod.Get, basicPassword);
+
+            return SendRequest(request);
+        }
+
+        public (HttpJsonClientStatus status, JObject? jObject) Post(string url, string? jsonBody = null, string? basicPassword = null)
+        {
+            var request = CreateHttpRequestMessage(url, HttpMethod.Post, basicPassword);
+            if (!string.IsNullOrWhiteSpace(jsonBody)) 
+                request.Content = new StringContent(jsonBody, Encoding.UTF8, MediaTypeNames.Application.Json);
+
+            return SendRequest(request);
+        }
+
+        private static HttpRequestMessage CreateHttpRequestMessage(string url, HttpMethod method, string? basicPassword = null)
+        {
+            var request = new HttpRequestMessage(method, url);
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaTypeNames.Application.Json));
             if (!string.IsNullOrEmpty(basicPassword))
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Basic",
                     Convert.ToBase64String(Encoding.UTF8.GetBytes(":" + basicPassword)));
             }
 
+            return request;
+        }
+
+        private (HttpJsonClientStatus status, JObject? jObject) SendRequest(HttpRequestMessage request)
+        {
             HttpResponseMessage response;
             try
             {
@@ -89,17 +113,17 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 var message = ex.InnerException is WebException wex
                     ? wex.Message
                     : ex.Message;
-                return (new HttpJsonClientStatus {ErrorMessage = message}, null);
+                return (new HttpJsonClientStatus { ErrorMessage = message }, null);
             }
 
             using (response)
             {
                 // Work around servers that report auth failure with redirect to a status 203 html page (in violation of our Accept header)
-                if (response.Content?.Headers?.ContentType?.MediaType == "text/html"
+                if (response.Content?.Headers?.ContentType?.MediaType == MediaTypeNames.Text.Html
                     && (response.StatusCode == HttpStatusCode.NonAuthoritativeInformation
                         || response.RequestMessage.RequestUri.AbsolutePath.Contains(@"signin")))
                 {
-                    return (new HttpJsonClientStatus {SignInPage = true}, null);
+                    return (new HttpJsonClientStatus { SignInPage = true }, null);
                 }
 
                 return (
@@ -107,7 +131,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                     ParseJsonOrDefault(response.Content)
                 );
             }
-        }
+        } 
 
         private JObject? ParseJsonOrDefault(HttpContent? httpContent)
         {

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Octopus.Data;
 using Octopus.Diagnostics;
@@ -60,22 +62,43 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             // ReSharper disable once StringLiteralTypo
             var workItemsUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/workitems?api-version=4.1";
 
-            var (status, jObject) = client.Get(workItemsUrl, personalAccessToken ?? GetPersonalAccessToken(adoBuildUrls));
-            if (status.HttpStatusCode == HttpStatusCode.NotFound)
+            var accessToken = personalAccessToken ?? GetPersonalAccessToken(adoBuildUrls);
+
+            var (getWorkItemsStatus, getWorkItemsResult) = client.Get(workItemsUrl, accessToken);
+            if (getWorkItemsStatus.HttpStatusCode == HttpStatusCode.NotFound)
             {
                 return ResultFromExtension<(int id, string url)[]>.Success(new (int, string)[0]);
             }
 
-            if (!status.IsSuccessStatusCode())
+            if (!getWorkItemsStatus.IsSuccessStatusCode())
             {
-                return ResultFromExtension<(int id, string url)[]>.Failed($"Error while fetching work item references from Azure DevOps: {status.ToDescription(jObject, testing)}");
+                return ResultFromExtension<(int id, string url)[]>.Failed($"Error while fetching work item references from Azure DevOps: {getWorkItemsStatus.ToDescription(getWorkItemsResult, testing)}");
+            }
+
+            // Fetching work items associated with the build changes
+
+            var changesUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/changes?includeSourceChange=true&api-version=4.1";
+
+            var (getChangesStatus, getChangesResult) = client.Get(changesUrl, accessToken);
+            if (!getChangesStatus.IsSuccessStatusCode())
+            {
+                return ResultFromExtension<(int id, string url)[]>.Failed($"Error while fetching build changes from Azure DevOps: {getChangesStatus.ToDescription(getChangesResult, testing)}");
+            }
+
+            var changeIds = getChangesResult?["value"]?.Select(el => el["id"]?.Value<string>() ?? default) ?? new List<string>();
+            var (getWorkItemsAssociatedWithTheChangesStatus, getWorkItemsAssociatedWithTheChangesResult) = client.Post(workItemsUrl, JsonConvert.SerializeObject(changeIds), accessToken);
+            if (!getWorkItemsAssociatedWithTheChangesStatus.IsSuccessStatusCode())
+            {
+                return ResultFromExtension<(int id, string url)[]>.Failed($"Error while fetching work items associated with the build changes from Azure DevOps: {getWorkItemsAssociatedWithTheChangesStatus.ToDescription(getWorkItemsAssociatedWithTheChangesResult, testing)}");
             }
 
             try
             {
-                return ResultFromExtension<(int id, string url)[]>.Success(jObject?["value"]?
-                    .Select(el => (el["id"]?.Value<int>() ?? default(int), el["url"]?.ToString() ?? string.Empty))
-                    .ToArray() ?? Array.Empty<(int id, string url)>());
+                return ResultFromExtension<(int id, string url)[]>.Success((getWorkItemsResult?["value"]?
+                    .Select(el => (el["id"]?.Value<int>() ?? default, el["url"]?.ToString() ?? string.Empty))
+                    .ToArray() ?? Array.Empty<(int id, string url)>()).Concat(getWorkItemsAssociatedWithTheChangesResult?["value"]?
+                    .Select(el => (el["id"]?.Value<int>() ?? default, el["url"]?.ToString() ?? string.Empty))
+                    .ToArray() ?? Array.Empty<(int id, string url)>()).Distinct().ToArray());
             }
             catch
             {
