@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>Octopus.Server.Extensibility.IssueTracker.AzureDevOps</AssemblyName>
     <RootNamespace>Octopus.Server.Extensibility.IssueTracker.AzureDevOps</RootNamespace>
     <NeutralLanguage>en-US</NeutralLanguage>

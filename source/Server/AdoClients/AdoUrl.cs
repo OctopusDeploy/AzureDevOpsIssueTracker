@@ -89,7 +89,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
                 var fullUri = new Uri(browserUrl);
                 var queryParams = HttpUtility.ParseQueryString(fullUri.Query);
-                var buildId = queryParams["buildId"];
+                var buildId = queryParams["buildId"]!;
                 return new AdoBuildUrls(prefixMatch.Groups[2].Value, int.Parse(buildId))
                 {
                     ProjectUrl = prefixMatch.Groups[1].Value

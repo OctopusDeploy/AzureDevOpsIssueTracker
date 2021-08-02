@@ -68,7 +68,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         {
             httpClient = octopusHttpClientFactory.CreateClient();
         }
-        
+
         public (HttpJsonClientStatus status, JObject? jObject) Get(string url, string? basicPassword = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -97,7 +97,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 // Work around servers that report auth failure with redirect to a status 203 html page (in violation of our Accept header)
                 if (response.Content?.Headers?.ContentType?.MediaType == "text/html"
                     && (response.StatusCode == HttpStatusCode.NonAuthoritativeInformation
-                        || response.RequestMessage.RequestUri.AbsolutePath.Contains(@"signin")))
+                        || response.RequestMessage?.RequestUri?.AbsolutePath.Contains(@"signin") == true))
                 {
                     return (new HttpJsonClientStatus {SignInPage = true}, null);
                 }
@@ -113,7 +113,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         {
             if (httpContent == null)
                 return null;
-            
+
             try
             {
                 return JObject.Parse(httpContent.ReadAsStringAsync().GetAwaiter().GetResult());
