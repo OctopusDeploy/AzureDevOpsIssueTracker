@@ -69,7 +69,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         {
             httpClient = octopusHttpClientFactory.CreateClient();
         }
-        
+
         public async Task<(HttpJsonClientStatus status, JObject? jObject)> Get(string url, string? basicPassword = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
