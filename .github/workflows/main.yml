@@ -1,0 +1,48 @@
+name: Build, Test, Package and Push
+
+# Controls when the action will run. 
+on: 
+  # Triggers the workflow on pull request events and merges/pushes to main
+  push:
+    branches:
+      - main
+      - release/*
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # all
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+          
+      - name: Nuke Build 🏗
+        id: build
+        shell: bash
+        run: ./build.sh --verbosity verbose
+        env:
+          OCTOVERSION_CurrentBranch:  ${{ github.head_ref || github.ref }} # For pull_request events we override the /refs/pull/xx/merge branch to the PR's head branch
+          OCTOVERSION_Patch : ${{ github.run_number }}
+
+      - name: Install Octopus CLI 🐙
+        uses: OctopusDeploy/install-octopus-cli-action@v1.1.6
+        with:
+          version: latest
+      
+      - name: Push to Octopus 🐙
+        uses: OctopusDeploy/push-package-action@v1.0.2
+        with:
+          server: https://deploy.octopus.app
+          space: Integrations
+          api_key: ${{ secrets.DEPLOY_API_KEY }}
+          packages: ${{ steps.build.outputs.packages_to_push }}
