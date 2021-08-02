@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
@@ -6,6 +8,8 @@ using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
 using Octopus.Server.Extensibility.Results;
 using Octopus.Server.MessageContracts.Features.BuildInformation;
+using Octopus.Server.MessageContracts.Features.IssueTrackers;
+using Octopus.Server.MessageContracts.Features.Spaces;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 {
@@ -17,17 +21,17 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var config = Substitute.For<IAzureDevOpsConfigurationStore>();
             config.GetIsEnabled().Returns(enabled);
             var adoApiClient = Substitute.For<IAdoApiClient>();
-            adoApiClient.GetBuildWorkItemLinks(new AdoBuildUrls("http://redstoneblock", 24)).ReturnsForAnyArgs(ci => throw new InvalidOperationException());
+            adoApiClient.GetBuildWorkItemLinks(Arg.Any<AdoBuildUrls>(), Arg.Any<SpaceId>(), Arg.Any<CancellationToken>()).Returns(ci =>  Task.FromException(new InvalidOperationException()));
             return new WorkItemLinkMapper(config, adoApiClient);
         }
 
         [Test]
-        public void WhenDisabledReturnsExtensionIsDisabled()
+        public async Task WhenDisabledReturnsExtensionIsDisabled()
         {
-            var links = CreateWorkItemLinkMapper(false).Map(new OctopusBuildInformation
+            var links = await CreateWorkItemLinkMapper(false).Map("Spaces-1".ToSpaceId(), new OctopusBuildInformation
             {
                 BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"
-            });
+            }, CancellationToken.None);
             Assert.IsInstanceOf<IFailureResultFromDisabledExtension>(links);
         }
     }

@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Octopus.Server.Extensibility.Extensions.WorkItems;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.Results;
 using Octopus.Server.MessageContracts.Features.BuildInformation;
 using Octopus.Server.MessageContracts.Features.IssueTrackers;
+using Octopus.Server.MessageContracts.Features.Spaces;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
 {
@@ -22,7 +25,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
         public string CommentParser => AzureDevOpsConfigurationStore.CommentParser;
         public bool IsEnabled => store.GetIsEnabled();
 
-        public IResultFromExtension<WorkItemLink[]> Map(OctopusBuildInformation buildInformation)
+        public async Task<IResultFromExtension<WorkItemLink[]>> Map(SpaceId spaceId, OctopusBuildInformation buildInformation, CancellationToken cancellationToken)
         {
             // For ADO, we should ignore anything that wasn't built by ADO because we get work items from the build
             if (!IsEnabled)
@@ -30,8 +33,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
             if (buildInformation?.BuildEnvironment != "Azure DevOps"
                 || string.IsNullOrWhiteSpace(buildInformation?.BuildUrl))
                 return ResultFromExtension<WorkItemLink[]>.Success(Array.Empty<WorkItemLink>());
-
-            return client.GetBuildWorkItemLinks(AdoBuildUrls.ParseBrowserUrl(buildInformation.BuildUrl));
+            
+            return await client.GetBuildWorkItemLinks(AdoBuildUrls.ParseBrowserUrl(buildInformation.BuildUrl), spaceId, cancellationToken);
         }
     }
 }

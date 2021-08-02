@@ -67,3 +67,5 @@ source/OctopusTools.v2.ncrunchsolution
 TestResult.xml
 TestResults/
 .idea/
+.DS_STORE
+*/.DS_STORE

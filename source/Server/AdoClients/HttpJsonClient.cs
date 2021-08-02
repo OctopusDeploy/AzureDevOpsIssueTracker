@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Web.Api;
 
@@ -55,7 +56,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
     interface IHttpJsonClient : IDisposable
     {
-        (HttpJsonClientStatus status, JObject? jObject) Get(string url, string? basicPassword = null);
+        Task<(HttpJsonClientStatus status, JObject? jObject)> Get(string url, string? basicPassword = null);
     }
 
     sealed class HttpJsonClient : IHttpJsonClient
@@ -68,8 +69,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         {
             httpClient = octopusHttpClientFactory.CreateClient();
         }
-
-        public (HttpJsonClientStatus status, JObject? jObject) Get(string url, string? basicPassword = null)
+        
+        public async Task<(HttpJsonClientStatus status, JObject? jObject)> Get(string url, string? basicPassword = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -82,7 +83,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             HttpResponseMessage response;
             try
             {
-                response = httpClient.SendAsync(request).GetAwaiter().GetResult();
+                response = await httpClient.SendAsync(request);
             }
             catch (HttpRequestException ex)
             {
