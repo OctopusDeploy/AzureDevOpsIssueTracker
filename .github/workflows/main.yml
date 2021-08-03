@@ -34,15 +34,12 @@ jobs:
           OCTOVERSION_CurrentBranch:  ${{ github.head_ref || github.ref }} # For pull_request events we override the /refs/pull/xx/merge branch to the PR's head branch
           OCTOVERSION_Patch : ${{ github.run_number }}
 
-      - name: Install Octopus CLI 🐙
-        uses: OctopusDeploy/install-octopus-cli-action@v1.1.6
-        with:
-          version: latest
-      
-      - name: Push to Octopus 🐙
-        uses: OctopusDeploy/push-package-action@v1.0.2
-        with:
-          server: https://deploy.octopus.app
-          space: Integrations
-          api_key: ${{ secrets.DEPLOY_API_KEY }}
-          packages: ${{ steps.build.outputs.packages_to_push }}
+      - name: Configure package source 🐙
+        id: build
+        shell: bash
+        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/OctopusDeploy/index.json"
+
+      - name: Push package 🐙
+        id: build
+        shell: bash
+        run: dotnet nuget push "${{ steps.build.outputs.packages_to_push }}" --source "github"
