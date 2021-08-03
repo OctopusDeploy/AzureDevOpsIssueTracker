@@ -29,7 +29,7 @@ jobs:
       - name: Configure package source 🐙
         id: package-source
         shell: bash
-        run: dotnet nuget update source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name GitHub "https://nuget.pkg.github.com/OctopusDeploy/index.json"
+        run: dotnet nuget update --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --source GitHub
           
       - name: Nuke Build 🏗
         id: build
