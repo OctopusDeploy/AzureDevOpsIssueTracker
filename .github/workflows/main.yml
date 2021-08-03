@@ -35,11 +35,11 @@ jobs:
           OCTOVERSION_Patch : ${{ github.run_number }}
 
       - name: Configure package source 🐙
-        id: build
+        id: package-source
         shell: bash
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/OctopusDeploy/index.json"
 
       - name: Push package 🐙
-        id: build
+        id: push
         shell: bash
         run: dotnet nuget push "${{ steps.build.outputs.packages_to_push }}" --source "github"
