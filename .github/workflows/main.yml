@@ -42,4 +42,4 @@ jobs:
       - name: Push package 🐙
         id: push
         shell: bash
-        run: dotnet nuget push "${{ steps.build.outputs.packages_to_push }}" --source "GitHub"
+        run: dotnet nuget push artifacts/**/*.nupkg --source "GitHub"
