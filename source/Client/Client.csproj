@@ -11,6 +11,7 @@
     <PackageLicenseUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker/blob/master/LICENSE.txt</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</PackageProjectUrl>
     <PackageIconUrl>http://i.octopusdeploy.com/resources/Avatar3_360.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</RepositoryUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
