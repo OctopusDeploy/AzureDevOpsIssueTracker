@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" xmlns:octopus="http://octopus.org">
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" xmlns:octopus="http://octopus.org" xmlns="">
   <metadata>
     <id>Octopus.Server.Extensibility.AzureDevOpsIssueTracker</id>
     <title>Octopus Server Extensibility Issue Tracker - AzureDevOps</title>
     <version>$version$</version>
     <authors>Octopus Deploy</authors>
-    <owners>Octopus Deploy</owners>
+    <owners>Octopus Deploy Pty. Ltd.</owners>
     <summary>Octopus Deploy AzureDevOps issue tracker.</summary>
     <description>
       Implements the AzureDevOps issue tracker.
@@ -15,6 +15,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <licenseUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker/blob/main/LICENSE.md</licenseUrl>
     <projectUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</projectUrl>
+    <repository>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</repository>
     <iconUrl>http://i.octopusdeploy.com/resources/Avatar3_360.png</iconUrl>
     <tags>automation deployment</tags>
     <developmentDependency>true</developmentDependency>
