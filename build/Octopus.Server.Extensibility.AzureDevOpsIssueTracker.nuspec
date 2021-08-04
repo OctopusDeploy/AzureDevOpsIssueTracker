@@ -14,7 +14,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <licenseUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker/blob/main/LICENSE.md</licenseUrl>
     <projectUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</projectUrl>
-    <repository type="git">https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</repository>
+    <repository type="git" url="https://github.com/OctopusDeploy/AzureDevOpsIssueTracker" />
     <iconUrl>https://i.octopusdeploy.com/resources/Avatar3_360.png</iconUrl>
     <tags>automation deployment</tags>
     <developmentDependency>true</developmentDependency>
