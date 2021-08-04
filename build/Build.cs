@@ -53,12 +53,12 @@ class Build : NukeBuild
         .DependsOn(Restore)
         .Executes(() =>
         {
-            Logger.Info("Building AzureDevOps issue tracker v{0}", GitVersionInfo.FullSemVer);
+            Logger.Info("Building AzureDevOps issue tracker v{0}", GitVersionInfo.NuGetVersion);
 
             DotNetBuild(_ => _
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-                .SetVersion(GitVersionInfo.FullSemVer)
+                .SetVersion(GitVersionInfo.NuGetVersion)
                 .EnableNoRestore());
         });
 
@@ -79,11 +79,11 @@ class Build : NukeBuild
         .Produces(ArtifactsDirectory / "*.nupkg")
         .Executes(() =>
         {
-            Logger.Info("Packing AzureDevOps issue tracker v{0}", GitVersionInfo.FullSemVer);
+            Logger.Info("Packing AzureDevOps issue tracker v{0}", GitVersionInfo.NuGetVersion);
 
             DotNetPack(_ => _
                 .SetProject(Solution)
-                .SetVersion(GitVersionInfo.FullSemVer)
+                .SetVersion(GitVersionInfo.NuGetVersion)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .EnableNoBuild()
@@ -94,7 +94,7 @@ class Build : NukeBuild
 
             DotNetPack(_ => _
                 .SetProject(RootDirectory / "source/Client/Client.csproj")
-                .SetVersion(GitVersionInfo.FullSemVer)
+                .SetVersion(GitVersionInfo.NuGetVersion)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .EnableNoBuild()
