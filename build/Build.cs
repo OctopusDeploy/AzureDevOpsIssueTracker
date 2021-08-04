@@ -18,7 +18,7 @@ class Build : NukeBuild
 
     [Solution] readonly Solution Solution;
 
-    [GitVersion] readonly GitVersion GitVersionInfo;
+    [GitVersion(Framework="net5.0", NoFetch = true)] readonly GitVersion GitVersionInfo;
 
     static AbsolutePath SourceDirectory => RootDirectory / "source";
     static AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
