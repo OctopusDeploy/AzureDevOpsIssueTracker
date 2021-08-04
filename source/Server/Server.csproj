@@ -8,7 +8,7 @@
     <Description>Implements the Azure DevOps issue tracker.</Description>
     <Authors>Octopus Deploy</Authors>
     <Company>Octopus Deploy Pty. Ltd.</Company>
-    <PackageIconUrl>http://i.octopusdeploy.com/resources/Avatar3_360.png</PackageIconUrl>
+    <PackageIconUrl>https://i.octopusdeploy.com/resources/Avatar3_360.png</PackageIconUrl>
     <PackageLicenseUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker/blob/master/LICENSE.txt</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</PackageProjectUrl>
     <RepositoryUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</RepositoryUrl>
