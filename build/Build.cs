@@ -6,10 +6,9 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities.Collections;
-using OctoVersion.Core;
+using Nuke.Common.Tools.GitVersion;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using Nuke.OctoVersion;
 
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
@@ -19,7 +18,7 @@ class Build : NukeBuild
 
     [Solution] readonly Solution Solution;
 
-    [NukeOctoVersion] readonly OctoVersionInfo OctoVersionInfo;
+    [GitVersion] readonly GitVersion GitVersionInfo;
 
     static AbsolutePath SourceDirectory => RootDirectory / "source";
     static AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
@@ -54,12 +53,12 @@ class Build : NukeBuild
         .DependsOn(Restore)
         .Executes(() =>
         {
-            Logger.Info("Building AzureDevOps issue tracker v{0}", OctoVersionInfo.FullSemVer);
+            Logger.Info("Building AzureDevOps issue tracker v{0}", GitVersionInfo.FullSemVer);
 
             DotNetBuild(_ => _
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-                .SetVersion(OctoVersionInfo.FullSemVer)
+                .SetVersion(GitVersionInfo.FullSemVer)
                 .EnableNoRestore());
         });
 
@@ -80,28 +79,28 @@ class Build : NukeBuild
         .Produces(ArtifactsDirectory / "*.nupkg")
         .Executes(() =>
         {
-            Logger.Info("Packing AzureDevOps issue tracker v{0}", OctoVersionInfo.FullSemVer);
+            Logger.Info("Packing AzureDevOps issue tracker v{0}", GitVersionInfo.FullSemVer);
 
             DotNetPack(_ => _
                 .SetProject(Solution)
-                .SetVersion(OctoVersionInfo.FullSemVer)
+                .SetVersion(GitVersionInfo.FullSemVer)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .EnableNoBuild()
                 .DisableIncludeSymbols()
                 .SetVerbosity(DotNetVerbosity.Normal)
                 .SetProperty("NuspecFile", "../../build/Octopus.Server.Extensibility.AzureDevOpsIssueTracker.nuspec")
-                .SetProperty("NuspecProperties", $"Version={OctoVersionInfo.NuGetVersion}"));
+                .SetProperty("NuspecProperties", $"Version={GitVersionInfo.NuGetVersion}"));
 
             DotNetPack(_ => _
                 .SetProject(RootDirectory / "source/Client/Client.csproj")
-                .SetVersion(OctoVersionInfo.FullSemVer)
+                .SetVersion(GitVersionInfo.FullSemVer)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .EnableNoBuild()
                 .DisableIncludeSymbols()
                 .SetVerbosity(DotNetVerbosity.Normal)
-                .SetProperty("NuspecProperties", $"Version={OctoVersionInfo.NuGetVersion}"));
+                .SetProperty("NuspecProperties", $"Version={GitVersionInfo.NuGetVersion}"));
         });
 
     Target CopyToLocalPackages => _ => _
