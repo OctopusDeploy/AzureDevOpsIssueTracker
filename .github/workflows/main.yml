@@ -30,9 +30,6 @@ jobs:
         id: build
         shell: bash
         run: ./build.sh --verbosity verbose
-        env:
-          OCTOVERSION_CurrentBranch:  ${{ github.head_ref || github.ref }} # For pull_request events we override the /refs/pull/xx/merge branch to the PR's head branch
-          OCTOVERSION_Patch : ${{ github.run_number }}
 
       - name: Push package 🐙
         id: push
