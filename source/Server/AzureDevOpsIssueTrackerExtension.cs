@@ -3,7 +3,6 @@ using Octopus.Server.Extensibility.Extensions;
 using Octopus.Server.Extensibility.Extensions.Infrastructure;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 using Octopus.Server.Extensibility.Extensions.Mappings;
-using Octopus.Server.Extensibility.Extensions.Model.Spaces;
 using Octopus.Server.Extensibility.Extensions.WorkItems;
 using Octopus.Server.Extensibility.HostServices.Web;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
@@ -43,7 +42,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
                 .InstancePerLifetimeScope();
 
             builder.RegisterType<SpaceSettingsMetadataProvider>()
-                .As<IContributeSpaceSettingsMetadata>()
+                .AsImplementedInterfaces()
                 .InstancePerDependency();
 
             builder.RegisterType<AzureDevOpsConfigureCommands>()

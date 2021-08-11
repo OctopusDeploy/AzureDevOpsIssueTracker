@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Octopus.Server.Extensibility.Extensions.Model.Spaces;
@@ -18,6 +19,10 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Spaces
 
         public string ExtensionId => AzureDevOpsConfigurationStore.SingletonId;
         public string ExtensionName => AzureDevOpsIssueTracker.Name;
+
+        public Type Resource => typeof(AzureDevOpsConfigurationOverrideResource);
+        
+        public Type Model => typeof(AzureDevOpsConfigurationOverride);
 
         public List<PropertyMetadata> Properties => store.GetIsEnabled()
             ? new MetadataGenerator().GetMetadata<AzureDevOpsConfigurationOverrideResource>().Types.First().Properties

@@ -15,7 +15,7 @@
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
     <PackageReference Include="Octopus.Diagnostics" Version="2.1.1" />
-    <PackageReference Include="Octopus.Server.Extensibility" Version="14.0.7-enh-multiple-ado0006" />
+    <PackageReference Include="Octopus.Server.Extensibility" Version="14.1.1-enh-multiple-ado0009" />
     <PackageReference Include="TeamCity.VSTest.TestAdapter" Version="1.0.15" />
   </ItemGroup>
 
