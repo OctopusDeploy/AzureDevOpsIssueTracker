@@ -182,7 +182,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 
             // Request to origin should include password
             await new AdoApiClient(log!, store, httpJsonClient, HtmlConvert, mediator)
-                .GetBuildWorkItemsRefs(AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"), "rumor", CancellationToken.None);
+                .GetBuildWorkItemsRefs(AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"), "rumor".ToSensitiveString(), CancellationToken.None);
             Assert.AreEqual("rumor", passwordSent);
         }
 

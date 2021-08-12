@@ -30,7 +30,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         [Description(PersonalAccessTokenDescription)]
         [Writeable]
         [AllowConnectivityCheck("Azure DevOps configuration", AzureDevOpsIssueTrackerApi.ApiConnectivityCheck, nameof(BaseUrl), nameof(PersonalAccessToken))]
-        public string? PersonalAccessToken { get; set; }
+        public SensitiveValue PersonalAccessToken { get; set; }
 
         [DisplayName("Release Note Options")]
         public ReleaseNoteOptionsResource ReleaseNoteOptions { get; set; } = new ReleaseNoteOptionsResource();

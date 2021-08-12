@@ -58,7 +58,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 }
                 else
                 {
-                    var projectsResult = await adoApiClient.GetProjectList(urls, personalAccessToken.Value, CancellationToken.None,true);
+                    var projectsResult = await adoApiClient.GetProjectList(urls, personalAccessToken, CancellationToken.None,true);
                     if (projectsResult is FailureResult failure)
                     {
                         connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, failure.ErrorString);
@@ -81,14 +81,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 
                 foreach (var projectUrl in projectUrls)
                 {
-                    var buildScopeTest = await adoApiClient.GetBuildWorkItemsRefs(AdoBuildUrls.Create(projectUrl, 1), personalAccessToken.Value, CancellationToken.None, true);
+                    var buildScopeTest = await adoApiClient.GetBuildWorkItemsRefs(AdoBuildUrls.Create(projectUrl, 1), personalAccessToken, CancellationToken.None, true);
                     if (buildScopeTest is FailureResult buildScopeFailure)
                     {
                         connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, buildScopeFailure.ErrorString);
                         continue;
                     }
 
-                    var workItemScopeTest = await adoApiClient.GetWorkItem(projectUrl, 1,personalAccessToken.Value, CancellationToken.None, true);
+                    var workItemScopeTest = await adoApiClient.GetWorkItem(projectUrl, 1,personalAccessToken, CancellationToken.None, true);
                     if (workItemScopeTest is FailureResult workItemScopeFailure)
                     {
                         connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, workItemScopeFailure.ErrorString);

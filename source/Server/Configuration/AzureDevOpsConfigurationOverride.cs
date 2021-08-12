@@ -1,5 +1,5 @@
-using System.Security;
-using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
+using Octopus.Data.Model;
+
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
@@ -10,7 +10,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         
         public string? BaseUrl { get; set; }
         
-        public SecureString? PersonalAccessToken { get; set; }
+        public SensitiveString? PersonalAccessToken { get; set; }
         
         public ReleaseNoteOptionsResource ReleaseNoteOptions { get; set; } = new ReleaseNoteOptionsResource();
     }

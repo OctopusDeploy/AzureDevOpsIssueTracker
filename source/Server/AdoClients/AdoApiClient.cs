@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Octopus.Data;
+using Octopus.Data.Model;
 using Octopus.Diagnostics;
 using Octopus.Server.Extensibility.HostServices.Model.Spaces;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
@@ -19,15 +20,15 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
     interface IAdoApiClient
     {
-        Task<IResultFromExtension<(int id, string url)[]>> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, string personalAccessToken,
+        Task<IResultFromExtension<(int id, string url)[]>> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, SensitiveString? personalAccessToken,
             CancellationToken cancellationToken, bool testing = false);
 
-        Task<IResultFromExtension<(string title, int? commentCount)>> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId, string personalAccessToken,
+        Task<IResultFromExtension<(string title, int? commentCount)>> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId, SensitiveString? personalAccessToken,
             CancellationToken cancellationToken,
             bool testing = false);
 
         Task<IResultFromExtension<WorkItemLink[]>> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls, SpaceId spaceId, CancellationToken cancellationToken);
-        Task<IResultFromExtension<string[]>> GetProjectList(AdoUrl adoUrl, string personalAccessToken, CancellationToken cancellationToken,
+        Task<IResultFromExtension<string[]>> GetProjectList(AdoUrl adoUrl, SensitiveString? personalAccessToken, CancellationToken cancellationToken,
             bool testing = false);
     }
 
@@ -48,15 +49,15 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             this.mediator = mediator;
         }
 
-        private async Task<string?> GetPersonalAccessToken(AdoUrl adoUrl, SpaceId spaceId, CancellationToken cancellationToken)
+        private async Task<SensitiveString?> GetPersonalAccessToken(AdoUrl adoUrl, SpaceId spaceId, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await GetBaseUrlWithOverrideCheck(spaceId, cancellationToken);
-                if (result.baseUrl == null)
+                var (baseUrl, accessToken) = await GetBaseUrlWithOverrideCheck(spaceId, cancellationToken);
+                if (baseUrl is null || accessToken is null )
                     return null;
-                var uri = new Uri(result.baseUrl.TrimEnd('/'), UriKind.Absolute);
-                return uri.IsBaseOf(new Uri(adoUrl.OrganizationUrl, UriKind.Absolute)) ? result.accessToken : null;
+                var uri = new Uri(baseUrl.TrimEnd('/'), UriKind.Absolute);
+                return uri.IsBaseOf(new Uri(adoUrl.OrganizationUrl, UriKind.Absolute)) ? accessToken : null;
             }
             catch
             {
@@ -64,10 +65,10 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
         }
 
-        private async Task<(string? baseUrl, string? accessToken)> GetBaseUrlWithOverrideCheck(SpaceId spaceId, CancellationToken cancellationToken)
+        private async Task<(string? baseUrl, SensitiveString? accessToken)> GetBaseUrlWithOverrideCheck(SpaceId spaceId, CancellationToken cancellationToken)
         {
             var spaceSettings = await mediator.Request(
-                new GetSpaceExtensionSettingsRequest<AzureDevOpsConfigurationOverrideResource>(
+                new GetSpaceExtensionSettingsRequest<AzureDevOpsConfigurationOverride>(
                     AzureDevOpsConfigurationStore.SingletonId,
                     spaceId.Value.ToSpaceIdOrName()),
                 cancellationToken);
@@ -77,17 +78,17 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 return (spaceSettings.Values?.BaseUrl, spaceSettings.Values?.PersonalAccessToken);
             }
 
-            return (store.GetBaseUrl(), store.GetPersonalAccessToken()?.Value);
+            return (store.GetBaseUrl(), store.GetPersonalAccessToken());
         }
 
-        public async Task<IResultFromExtension<(int id, string url)[]>> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, string personalAccessToken,
+        public async Task<IResultFromExtension<(int id, string url)[]>> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, SensitiveString? personalAccessToken,
             CancellationToken cancellationToken,
             bool testing = false)
         {
             // ReSharper disable once StringLiteralTypo
             var workItemsUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/workitems?api-version=4.1";
 
-            var (status, jObject) = await client.Get(workItemsUrl, personalAccessToken);
+            var (status, jObject) = await client.Get(workItemsUrl, personalAccessToken?.Value);
             if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
                 return ResultFromExtension<(int id, string url)[]>.Success(new (int, string)[0]);
@@ -111,11 +112,11 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         }
 
         public async Task<IResultFromExtension<(string title, int? commentCount)>> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId,
-            string personalAccessToken, CancellationToken cancellationToken, bool testing = false)
+            SensitiveString? personalAccessToken, CancellationToken cancellationToken, bool testing = false)
         {
             // ReSharper disable once StringLiteralTypo
             var (status, jObject) = await client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}?api-version=4.1",
-                personalAccessToken);
+                personalAccessToken?.Value);
             if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
                 return ResultFromExtension<(string title, int? commentCount)>.Success((workItemId.ToString(), 0));
@@ -145,7 +146,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         {
             // ReSharper disable once StringLiteralTypo
             var (status, jObject) = await client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}/comments?api-version=4.1-preview.2",
-                await GetPersonalAccessToken(adoProjectUrls, spaceId, cancellationToken));
+                (await GetPersonalAccessToken(adoProjectUrls, spaceId, cancellationToken))?.Value);
 
             if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
@@ -258,11 +259,11 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             return ResultFromExtension<WorkItemLink[]>.Success(validWorkItemLinks);
         }
 
-        public async Task<IResultFromExtension<string[]>> GetProjectList(AdoUrl adoUrl, string personalAccessToken, CancellationToken cancellationToken,
+        public async Task<IResultFromExtension<string[]>> GetProjectList(AdoUrl adoUrl, SensitiveString? personalAccessToken, CancellationToken cancellationToken,
             bool testing = false)
         {
             var (status, jObject) = await client.Get($"{adoUrl.OrganizationUrl}/_apis/projects?api-version=4.1",
-                personalAccessToken);
+                personalAccessToken?.Value);
 
             if (!status.IsSuccessStatusCode())
             {
