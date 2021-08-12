@@ -7,11 +7,11 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
     {
 
         public bool IsOverriding { get; set; }
-        
+
         public string? BaseUrl { get; set; }
-        
+
         public SensitiveString? PersonalAccessToken { get; set; }
-        
-        public ReleaseNoteOptionsResource ReleaseNoteOptions { get; set; } = new ReleaseNoteOptionsResource();
+
+        public ReleaseNoteOptions ReleaseNoteOptions { get; set; } = new ReleaseNoteOptions();
     }
 }
