@@ -36,22 +36,22 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             return store;
         }
 
-        private static GetExtensionSettingsResponse<AzureDevOpsConfigurationOverrideResource> CreateGetExtensionSettingsResponse(bool isOverriding)
+        private static GetExtensionSettingsResponse<AzureDevOpsConfigurationOverride> CreateGetExtensionSettingsResponse(bool isOverriding)
         {
-            var spaceSettings = new AzureDevOpsConfigurationOverrideResource()
+            var spaceSettings = new AzureDevOpsConfigurationOverride()
             {
                 BaseUrl = "http://redstoneblock/DefaultCollection/",
                 IsOverriding = isOverriding,
-                PersonalAccessToken = "spaceRumor"
+                PersonalAccessToken =  "spaceRumor".ToSensitiveString()
             };
-            return new GetExtensionSettingsResponse<AzureDevOpsConfigurationOverrideResource>(spaceSettings);
+            return new GetExtensionSettingsResponse<AzureDevOpsConfigurationOverride>(spaceSettings);
         }
 
         private static IMediator CreateSubstituteMediator(bool isOverriding = false)
         {
             var mediator = Substitute.For<IMediator>();
             mediator.Request(
-                Arg.Any<GetSpaceExtensionSettingsRequest<AzureDevOpsConfigurationOverrideResource>>(), 
+                Arg.Any<GetSpaceExtensionSettingsRequest<AzureDevOpsConfigurationOverride>>(), 
                 Arg.Any<CancellationToken>())
                 .Returns(CreateGetExtensionSettingsResponse(isOverriding));
 
