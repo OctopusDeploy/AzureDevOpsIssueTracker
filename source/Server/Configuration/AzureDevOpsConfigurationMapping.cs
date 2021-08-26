@@ -3,8 +3,11 @@ using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
-    class AzureDevOpsConfigurationMapping : IConfigurationDocumentMapper
+    internal class AzureDevOpsConfigurationMapping : IConfigurationDocumentMapper
     {
-        public Type GetTypeToMap() => typeof(AzureDevOpsConfiguration);
+        public Type GetTypeToMap()
+        {
+            return typeof(AzureDevOpsConfiguration);
+        }
     }
 }

@@ -1,19 +1,17 @@
 using System;
 using System.Linq;
 using Nuke.Common;
-using Nuke.Common.CI;
-using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.Git;
+using Nuke.Common.Tools.OctoVersion;
+using Nuke.Common.Tools.ReSharper;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using Nuke.Common.Tools.OctoVersion;
-using Nuke.Common.Tools.ReSharper;
 
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
@@ -21,9 +19,9 @@ class Build : NukeBuild
 {
     readonly Configuration Configuration = Configuration.Release;
 
-    [Solution] readonly Solution Solution;
-
     [OctoVersion] readonly OctoVersionInfo OctoVersionInfo;
+
+    [Solution] readonly Solution Solution;
 
     static AbsolutePath SourceDirectory => RootDirectory / "source";
     static AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
@@ -74,16 +72,10 @@ class Build : NukeBuild
             ReSharperTasks.ReSharperCleanupCode(new ReSharperCleanupCodeSettings()
                 .SetTargetPath(Solution.Path));
 
-            if (IsLocalBuild)
-            {
-                return;
-            }
+            if (IsLocalBuild) return;
 
             var gitRepo = GitRepository.FromLocalDirectory("./");
-            if (gitRepo.Branch == null || gitRepo.Branch.StartsWith("prettybot/"))
-            {
-                return;
-            }
+            if (gitRepo.Branch == null || gitRepo.Branch.StartsWith("prettybot/")) return;
             var prettyBotBranch = $"prettybot/{gitRepo.Branch}";
 
             if (prettyBotBranch is "main" or "master")
@@ -111,10 +103,7 @@ class Build : NukeBuild
             if (gitStatus.Count == 0)
             {
                 var remote = GitTasks.Git($"git ls-remote origin {prettyBotBranch}");
-                if (remote.Count == 0)
-                {
-                    GitTasks.Git($"push origin :{prettyBotBranch}");
-                }
+                if (remote.Count == 0) GitTasks.Git($"push origin :{prettyBotBranch}");
 
                 return;
             }
@@ -144,7 +133,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             Logger.Info("Packing AzureDevOps issue tracker v{0}", OctoVersionInfo.FullSemVer);
-            
+
             // This is done to pass the data to github actions
             Console.Out.WriteLine($"::set-output name=semver::{OctoVersionInfo.FullSemVer}");
             Console.Out.WriteLine($"::set-output name=prerelease_tag::{OctoVersionInfo.PreReleaseTagWithDash}");
@@ -192,7 +181,7 @@ class Build : NukeBuild
                 .NotEmpty()
                 .Select(p => p.ToString());
 
-            System.Console.WriteLine($"::set-output name=packages_to_push::{string.Join(',', artifactPaths)}");
+            Console.WriteLine($"::set-output name=packages_to_push::{string.Join(',', artifactPaths)}");
         });
 
     Target Default => _ => _

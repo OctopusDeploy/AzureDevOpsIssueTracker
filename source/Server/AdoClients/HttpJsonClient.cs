@@ -8,7 +8,7 @@ using Octopus.Server.Extensibility.Extensions.Infrastructure.Web.Api;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
-    class HttpJsonClientStatus
+    internal class HttpJsonClientStatus
     {
         public HttpStatusCode HttpStatusCode { get; set; }
         public bool SignInPage { get; set; }
@@ -17,48 +17,39 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         public bool IsSuccessStatusCode()
         {
             return HttpStatusCode >= HttpStatusCode.OK
-                   && HttpStatusCode <= (HttpStatusCode) 299;
+                   && HttpStatusCode <= (HttpStatusCode)299;
         }
 
         public string ToDescription(JObject? jObject = null, bool disableSettingsHints = false)
         {
-            if (!string.IsNullOrWhiteSpace(ErrorMessage))
-            {
-                return ErrorMessage;
-            }
+            if (!string.IsNullOrWhiteSpace(ErrorMessage)) return ErrorMessage;
 
             var authMessage = disableSettingsHints
                 ? $" Please confirm you are using a Personal Access Token authorized {HttpJsonClient.AuthMessageScope}."
                 : $" Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings, and is authorized {HttpJsonClient.AuthMessageScope}.";
-            if (SignInPage)
-            {
-                return "The server returned a sign-in page." + authMessage;
-            }
+            if (SignInPage) return "The server returned a sign-in page." + authMessage;
 
-            var description = $"{(int) HttpStatusCode} ({HttpStatusCode}).";
+            var description = $"{(int)HttpStatusCode} ({HttpStatusCode}).";
             var bodyMessage = jObject?["message"]?.ToString();
-            if (!string.IsNullOrWhiteSpace(bodyMessage))
-            {
-                description += $" \"{bodyMessage}\"";
-            }
+            if (!string.IsNullOrWhiteSpace(bodyMessage)) description += $" \"{bodyMessage}\"";
 
-            if (HttpStatusCode == HttpStatusCode.Unauthorized)
-            {
-                description += authMessage;
-            }
+            if (HttpStatusCode == HttpStatusCode.Unauthorized) description += authMessage;
 
             return description;
         }
 
-        public static implicit operator HttpJsonClientStatus(HttpStatusCode code) => new HttpJsonClientStatus {HttpStatusCode = code};
+        public static implicit operator HttpJsonClientStatus(HttpStatusCode code)
+        {
+            return new() { HttpStatusCode = code };
+        }
     }
 
-    interface IHttpJsonClient : IDisposable
+    internal interface IHttpJsonClient : IDisposable
     {
         (HttpJsonClientStatus status, JObject? jObject) Get(string url, string? basicPassword = null);
     }
 
-    sealed class HttpJsonClient : IHttpJsonClient
+    internal sealed class HttpJsonClient : IHttpJsonClient
     {
         public static string AuthMessageScope = "for this scope";
 
@@ -74,10 +65,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             if (!string.IsNullOrEmpty(basicPassword))
-            {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Basic",
                     Convert.ToBase64String(Encoding.UTF8.GetBytes(":" + basicPassword)));
-            }
 
             HttpResponseMessage response;
             try
@@ -89,7 +78,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 var message = ex.InnerException is WebException wex
                     ? wex.Message
                     : ex.Message;
-                return (new HttpJsonClientStatus {ErrorMessage = message}, null);
+                return (new HttpJsonClientStatus { ErrorMessage = message }, null);
             }
 
             using (response)
@@ -98,15 +87,18 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 if (response.Content?.Headers?.ContentType?.MediaType == "text/html"
                     && (response.StatusCode == HttpStatusCode.NonAuthoritativeInformation
                         || response.RequestMessage?.RequestUri?.AbsolutePath.Contains(@"signin") == true))
-                {
-                    return (new HttpJsonClientStatus {SignInPage = true}, null);
-                }
+                    return (new HttpJsonClientStatus { SignInPage = true }, null);
 
                 return (
                     response.StatusCode,
                     ParseJsonOrDefault(response.Content)
                 );
             }
+        }
+
+        public void Dispose()
+        {
+            httpClient.Dispose();
         }
 
         private JObject? ParseJsonOrDefault(HttpContent? httpContent)
@@ -122,11 +114,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             {
                 return null;
             }
-        }
-
-        public void Dispose()
-        {
-            httpClient.Dispose();
         }
     }
 }
