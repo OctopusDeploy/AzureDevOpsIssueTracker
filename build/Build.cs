@@ -4,13 +4,16 @@ using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.Execution;
+using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
+using Nuke.Common.Tools.Git;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using Nuke.Common.Tools.OctoVersion;
+using Nuke.Common.Tools.ReSharper;
 
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
@@ -64,8 +67,67 @@ class Build : NukeBuild
                 .EnableNoRestore());
         });
 
+    Target CleanCode => _ => _
+        .DependsOn(Compile)
+        .Executes(() =>
+        {
+            ReSharperTasks.ReSharperCleanupCode(new ReSharperCleanupCodeSettings()
+                .SetTargetPath(Solution.Path));
+
+            if (IsLocalBuild)
+            {
+                return;
+            }
+
+            var gitRepo = GitRepository.FromLocalDirectory("./");
+            if (gitRepo.Branch == null || gitRepo.Branch.StartsWith("prettybot/"))
+            {
+                return;
+            }
+            var prettyBotBranch = $"prettybot/{gitRepo.Branch}";
+
+            if (prettyBotBranch is "main" or "master")
+            {
+                Logger.Info("Doing anything automated to the default branch is not recommended. Exiting.");
+                return;
+            }
+
+            GitTasks.Git("config user.email \"bob@octopus.com\"");
+            GitTasks.Git("config user.name \"prettybot[bot]\"");
+
+            try
+            {
+                GitTasks.Git($"show-ref --verify --quiet refs/heads/{prettyBotBranch}");
+                GitTasks.Git($"checkout -D {prettyBotBranch}");
+            }
+            catch
+            {
+                // ignored
+            }
+
+
+            GitTasks.Git("status");
+            var gitStatus = GitTasks.Git("status -s");
+            if (gitStatus.Count == 0)
+            {
+                var remote = GitTasks.Git($"git ls-remote origin {prettyBotBranch}");
+                if (remote.Count == 0)
+                {
+                    GitTasks.Git($"push origin :{prettyBotBranch}");
+                }
+
+                return;
+            }
+
+            GitTasks.Git($"checkout -b {prettyBotBranch}");
+            GitTasks.Git("add -A .");
+            GitTasks.Git("commit -m \"Run ReSharper code cleanup\"");
+            GitTasks.Git($"push -f --set-upstream origin {prettyBotBranch}");
+        });
+
     Target Test => _ => _
         .DependsOn(Compile)
+        .DependsOn(CleanCode)
         .Executes(() =>
         {
             DotNetTest(_ => _
