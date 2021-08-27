@@ -10,13 +10,13 @@ using Octopus.Server.Extensibility.Resources.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 {
-    class AzureDevOpsConnectivityCheckAction : IAsyncApiAction
+    internal class AzureDevOpsConnectivityCheckAction : IAsyncApiAction
     {
-        static readonly RequestBodyRegistration<ConnectionCheckData> Data = new RequestBodyRegistration<ConnectionCheckData>();
-        static readonly OctopusJsonRegistration<ConnectivityCheckResponse> Result = new OctopusJsonRegistration<ConnectivityCheckResponse>();
+        private static readonly RequestBodyRegistration<ConnectionCheckData> Data = new();
+        private static readonly OctopusJsonRegistration<ConnectivityCheckResponse> Result = new();
+        private readonly IAdoApiClient adoApiClient;
 
         private readonly IAzureDevOpsConfigurationStore configurationStore;
-        private readonly IAdoApiClient adoApiClient;
 
         public AzureDevOpsConnectivityCheckAction(IAzureDevOpsConfigurationStore configurationStore, IAdoApiClient adoApiClient)
         {
@@ -37,10 +37,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 // the configuration as we won't have the value of the PersonalAccessToken on client side, so we need to retrieve it
                 // from the database
                 var personalAccessToken = requestData.PersonalAccessToken.ToSensitiveString();
-                if (string.IsNullOrEmpty(personalAccessToken?.Value))
-                {
-                    personalAccessToken = configurationStore.GetPersonalAccessToken();
-                }
+                if (string.IsNullOrEmpty(personalAccessToken?.Value)) personalAccessToken = configurationStore.GetPersonalAccessToken();
 
                 if (string.IsNullOrEmpty(baseUrl))
                 {
@@ -52,7 +49,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 AdoProjectUrls[] projectUrls;
                 if (urls.ProjectUrl != null)
                 {
-                    projectUrls = new[] {urls};
+                    projectUrls = new[] { urls };
                 }
                 else
                 {
@@ -63,11 +60,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                         return Task.FromResult(Result.Response(connectivityCheckResponse));
                     }
 
-                    var projects = (ISuccessResult<string[]>) projectsResult;
+                    var projects = (ISuccessResult<string[]>)projectsResult;
 
                     if (!projects.Value.Any())
                     {
-                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, "Successfully connected, but unable to find any projects to test permissions.");
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error,
+                            "Successfully connected, but unable to find any projects to test permissions.");
                         return Task.FromResult(Result.Response(connectivityCheckResponse));
                     }
 
@@ -97,9 +95,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                     connectivityCheckResponse = new ConnectivityCheckResponse();
                     connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Info, "The Azure DevOps connection was tested successfully");
                     if (!configurationStore.GetIsEnabled())
-                    {
-                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Info, "The Jira Issue Tracker is not enabled, so its functionality will not currently be available");
-                    }
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Info,
+                            "The Jira Issue Tracker is not enabled, so its functionality will not currently be available");
 
                     return Task.FromResult(Result.Response(connectivityCheckResponse));
                 }
@@ -115,7 +112,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
     }
 
 #nullable disable
-    class ConnectionCheckData
+    internal class ConnectionCheckData
     {
         public string BaseUrl { get; set; }
         public string PersonalAccessToken { get; set; }

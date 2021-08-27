@@ -3,7 +3,7 @@ using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
-    class AzureDevOpsConfiguration : ExtensionConfigurationDocument
+    internal class AzureDevOpsConfiguration : ExtensionConfigurationDocument
     {
         public AzureDevOpsConfiguration() : base(AzureDevOpsConfigurationStore.SingletonId, "AzureDevOps", "Octopus Deploy", "1.0")
         {
@@ -13,10 +13,10 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 
         public SensitiveString? PersonalAccessToken { get; set; }
 
-        public ReleaseNoteOptions ReleaseNoteOptions { get; set; } = new ReleaseNoteOptions();
+        public ReleaseNoteOptions ReleaseNoteOptions { get; set; } = new();
     }
 
-    class ReleaseNoteOptions
+    internal class ReleaseNoteOptions
     {
         public string? ReleaseNotePrefix { get; set; }
     }

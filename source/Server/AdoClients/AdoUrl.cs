@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Web;
 using System.Text.RegularExpressions;
+using System.Web;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
-    class AdoUrl
+    internal class AdoUrl
     {
         public AdoUrl(string organizationUrl)
         {
@@ -14,7 +14,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         public string OrganizationUrl { get; }
     }
 
-    class AdoProjectUrls : AdoUrl
+    internal class AdoProjectUrls : AdoUrl
     {
         public AdoProjectUrls(string organizationUrl) : base(organizationUrl)
         {
@@ -65,7 +65,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         }
     }
 
-    class AdoBuildUrls : AdoProjectUrls
+    internal class AdoBuildUrls : AdoProjectUrls
     {
         public AdoBuildUrls(string organizationUrl, int buildId) : base(organizationUrl)
         {
@@ -77,15 +77,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         public static AdoBuildUrls ParseBrowserUrl(string browserUrl)
         {
             ArgumentException ParseError(Exception? innerException = null)
-                => new ArgumentException("Unrecognized build browse URL.", nameof(browserUrl), innerException);
+            {
+                return new("Unrecognized build browse URL.", nameof(browserUrl), innerException);
+            }
 
             try
             {
                 var prefixMatch = Regex.Match(browserUrl, @"^\s*((https?://.+?)/+[^\/]+)/+_build\b");
-                if (!prefixMatch.Success)
-                {
-                    throw ParseError();
-                }
+                if (!prefixMatch.Success) throw ParseError();
 
                 var fullUri = new Uri(browserUrl);
                 var queryParams = HttpUtility.ParseQueryString(fullUri.Query);

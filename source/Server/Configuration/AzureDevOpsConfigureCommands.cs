@@ -6,10 +6,10 @@ using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
-    class AzureDevOpsConfigureCommands : IContributeToConfigureCommand
+    internal class AzureDevOpsConfigureCommands : IContributeToConfigureCommand
     {
-        readonly ISystemLog systemLog;
-        readonly Lazy<IAzureDevOpsConfigurationStore> azureDevOpsConfiguration;
+        private readonly Lazy<IAzureDevOpsConfigurationStore> azureDevOpsConfiguration;
+        private readonly ISystemLog systemLog;
 
         public AzureDevOpsConfigureCommands(
             ISystemLog systemLog,

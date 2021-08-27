@@ -8,10 +8,10 @@ using Octopus.Server.MessageContracts.Features.IssueTrackers;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
 {
-    class WorkItemLinkMapper : IWorkItemLinkMapper
+    internal class WorkItemLinkMapper : IWorkItemLinkMapper
     {
-        private readonly IAzureDevOpsConfigurationStore store;
         private readonly IAdoApiClient client;
+        private readonly IAzureDevOpsConfigurationStore store;
 
         public WorkItemLinkMapper(IAzureDevOpsConfigurationStore store, IAdoApiClient client)
         {

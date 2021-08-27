@@ -4,10 +4,10 @@ using Octopus.Server.Extensibility.Extensions.Infrastructure;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
-    class DatabaseInitializer : ExecuteWhenDatabaseInitializes
+    internal class DatabaseInitializer : ExecuteWhenDatabaseInitializes
     {
-        readonly ISystemLog systemLog;
-        readonly IConfigurationStore configurationStore;
+        private readonly IConfigurationStore configurationStore;
+        private readonly ISystemLog systemLog;
 
         public DatabaseInitializer(ISystemLog systemLog, IConfigurationStore configurationStore)
         {

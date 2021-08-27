@@ -16,7 +16,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
     [TestFixture]
     public class AdoApiClientScenarios
     {
-        private static readonly HtmlConvert HtmlConvert = new HtmlConvert(Substitute.For<ISystemLog>());
+        [SetUp]
+        public void SetUp()
+        {
+            log = Substitute.For<ISystemLog>();
+        }
+
+        private static readonly HtmlConvert HtmlConvert = new(Substitute.For<ISystemLog>());
         private ISystemLog? log;
 
         private static IAzureDevOpsConfigurationStore CreateSubstituteStore()
@@ -26,12 +32,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             store.GetPersonalAccessToken().Returns("rumor".ToSensitiveString());
             store.GetReleaseNotePrefix().Returns("= Changelog =");
             return store;
-        }
-
-        [SetUp]
-        public void SetUp()
-        {
-            log = Substitute.For<ISystemLog>();
         }
 
         [Test]
@@ -121,7 +121,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(log!, store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=29"));
 
-            var successResult = ((ISuccessResult<WorkItemLink[]>)workItemLinks);
+            var successResult = (ISuccessResult<WorkItemLink[]>)workItemLinks;
             Assert.AreEqual(2, successResult.Value.Length);
             Assert.AreEqual("5", successResult.Value[0].Id);
             Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=5", successResult.Value[0].LinkUrl);

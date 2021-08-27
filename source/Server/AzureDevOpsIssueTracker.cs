@@ -3,11 +3,11 @@ using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
 {
-    class AzureDevOpsIssueTracker : IIssueTracker
+    internal class AzureDevOpsIssueTracker : IIssueTracker
     {
         internal static string Name = "Azure DevOps";
 
-        readonly IAzureDevOpsConfigurationStore configurationStore;
+        private readonly IAzureDevOpsConfigurationStore configurationStore;
 
         public AzureDevOpsIssueTracker(IAzureDevOpsConfigurationStore configurationStore)
         {

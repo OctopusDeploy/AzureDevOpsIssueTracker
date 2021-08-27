@@ -5,7 +5,7 @@ using Octopus.Server.Extensibility.HostServices.Mapping;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
-    class AzureDevOpsConfigurationSettings :
+    internal class AzureDevOpsConfigurationSettings :
         ExtensionConfigurationSettings<AzureDevOpsConfiguration, AzureDevOpsConfigurationResource, IAzureDevOpsConfigurationStore>,
         IAzureDevOpsConfigurationSettings
     {

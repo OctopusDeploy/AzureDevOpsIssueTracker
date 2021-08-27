@@ -7,7 +7,7 @@ using Octopus.Diagnostics;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
 {
-    class HtmlConvert
+    internal class HtmlConvert
     {
         private static readonly IReadOnlyDictionary<string, bool> NewlineElementNames =
             // ReSharper disable once StringLiteralTypo
@@ -52,10 +52,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
 
             if (node.ChildNodes.Count > 0)
             {
-                foreach (var child in node.ChildNodes)
-                {
-                    AppendPlainText(sb, child);
-                }
+                foreach (var child in node.ChildNodes) AppendPlainText(sb, child);
 
                 AppendAnyNewlines(sb, node);
             }
@@ -66,10 +63,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
             if (node.NodeType == HtmlNodeType.Element && NewlineElementNames.ContainsKey(node.Name))
             {
                 sb.AppendLine();
-                if ("p".Equals(node.Name, StringComparison.OrdinalIgnoreCase))
-                {
-                    sb.AppendLine();
-                }
+                if ("p".Equals(node.Name, StringComparison.OrdinalIgnoreCase)) sb.AppendLine();
             }
         }
     }

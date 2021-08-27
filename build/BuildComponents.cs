@@ -30,7 +30,7 @@ public interface IOctopusNukeBuild : INukeBuild
     public AbsolutePath LocalPackagesDir => RootDirectory / ".." / "LocalPackages";
 }
 
-public interface IRestore: IOctopusNukeBuild
+public interface IRestore : IOctopusNukeBuild
 {
     Target Restore => _ => _
         .TryDependsOn<IClean>(x => x.Clean)
@@ -41,7 +41,7 @@ public interface IRestore: IOctopusNukeBuild
         });
 }
 
-public interface IClean: IOctopusNukeBuild
+public interface IClean : IOctopusNukeBuild
 {
     Target Clean => _ => _
         .TryBefore<IRestore>(x => x.Restore)
@@ -123,7 +123,7 @@ public interface ICleanCode : IOctopusNukeBuild
         });
 }
 
-public interface ITest: IOctopusNukeBuild
+public interface ITest : IOctopusNukeBuild
 {
     Target Test => _ => _
         .TryDependsOn<ICompile>(x => x.Compile)
@@ -141,6 +141,7 @@ public interface ITest: IOctopusNukeBuild
 public interface IPackExtension : IOctopusNukeBuild
 {
     public string NuspecFilePath { get; }
+
     Target Pack => _ => _
         .TryDependsOn<ITest>(x => x.Test)
         .Produces(ArtifactsDirectory / "*.nupkg")
@@ -215,7 +216,6 @@ public interface ICopyToLocalPackages : IOctopusNukeBuild
                     CopyFileToDirectory(package, LocalPackagesDir, FileExistsPolicy.Overwrite);
                 });
         });
-
 }
 
 public interface IOutputPackagesToPush : IOctopusNukeBuild
@@ -230,7 +230,6 @@ public interface IOutputPackagesToPush : IOctopusNukeBuild
 
             Console.WriteLine($"::set-output name=packages_to_push::{string.Join(',', artifactPaths)}");
         });
-
 }
 
 public interface IExtensionBuild :
