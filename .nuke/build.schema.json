@@ -63,8 +63,8 @@
           "items": {
             "type": "string",
             "enum": [
-              "CalculateVersion",
               "Clean",
+              "CleanCode",
               "Compile",
               "CopyToLocalPackages",
               "Default",
@@ -85,8 +85,8 @@
           "items": {
             "type": "string",
             "enum": [
-              "CalculateVersion",
               "Clean",
+              "CleanCode",
               "Compile",
               "CopyToLocalPackages",
               "Default",
