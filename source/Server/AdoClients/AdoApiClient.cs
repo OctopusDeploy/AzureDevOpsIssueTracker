@@ -53,7 +53,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         {
             try
             {
-                var (baseUrl, accessToken) = await GetBaseUrlWithOverrideCheck(spaceId, cancellationToken);
+                var (baseUrl, accessToken) = await GetBaseUrlWithOverrideCheck(adoUrl, spaceId, cancellationToken);
                 if (baseUrl is null || accessToken is null )
                     return null;
                 var uri = new Uri(baseUrl.TrimEnd('/'), UriKind.Absolute);
@@ -65,7 +65,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
         }
 
-        private async Task<(string? baseUrl, SensitiveString? accessToken)> GetBaseUrlWithOverrideCheck(SpaceId spaceId, CancellationToken cancellationToken)
+        private async Task<(string? baseUrl, SensitiveString? accessToken)> GetBaseUrlWithOverrideCheck(AdoUrl adoUrl, SpaceId spaceId, CancellationToken cancellationToken)
         {
             var spaceSettings = await mediator.Request(
                 new GetSpaceExtensionSettingsRequest<AzureDevOpsConfigurationOverride>(
@@ -75,7 +75,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             
             if (spaceSettings.Values?.IsOverriding == true)
             {
-                return (spaceSettings.Values?.BaseUrl, spaceSettings.Values?.PersonalAccessToken);
+                var values = spaceSettings.Values?.Settings.FirstOrDefault(x => new Uri(x.BaseUrl?.TrimEnd('/'), UriKind.Absolute).IsBaseOf(new Uri(adoUrl.OrganizationUrl, UriKind.Absolute)));
+                return values is null ? (null, null) : (values.BaseUrl, values.PersonalAccessToken);
+                // return (spaceSettings.Values?.BaseUrl, spaceSettings.Values?.PersonalAccessToken);
             }
 
             return (store.GetBaseUrl(), store.GetPersonalAccessToken());

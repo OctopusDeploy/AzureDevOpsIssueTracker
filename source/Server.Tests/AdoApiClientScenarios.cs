@@ -40,9 +40,15 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
         {
             var spaceSettings = new AzureDevOpsConfigurationOverride()
             {
-                BaseUrl = "http://redstoneblock/DefaultCollection/",
                 IsOverriding = isOverriding,
-                PersonalAccessToken =  "spaceRumor".ToSensitiveString()
+                Settings = new Setting[]
+                {
+                    new Setting
+                    {
+                        PersonalAccessToken =  "spaceRumor".ToSensitiveString(),
+                        BaseUrl = "http://redstoneblock/DefaultCollection/"
+                    }
+                }
             };
             return new GetExtensionSettingsResponse<AzureDevOpsConfigurationOverride>(spaceSettings);
         }

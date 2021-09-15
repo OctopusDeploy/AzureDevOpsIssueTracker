@@ -8,12 +8,23 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
     class AzureDevOpsConfigurationOverrideResource: IExtensionConfigurationOverrideResource
     {
+
         [DisplayName("Override Settings")]
         [Description("Whether or not this extension overrides settings for this space")]
         [Required]
         [Writeable]
         public bool IsOverriding { get; set; }
-        
+
+
+        [DisplayName("Connection Settings")]
+        [Writeable]
+        public SettingResource[] Settings { get; set; } = new[] { new SettingResource() };
+
+
+    }
+
+    class SettingResource
+    {
         public const string BaseUrlDisplayName = "Azure DevOps Base Url";
         public const string BaseUrlDescription = "Set the base url for the Azure DevOps organization or collection or project.";
 

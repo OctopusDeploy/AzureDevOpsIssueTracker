@@ -20,6 +20,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Spaces
         public string ExtensionId => AzureDevOpsConfigurationStore.SingletonId;
         public string ExtensionName => AzureDevOpsIssueTracker.Name;
 
+        // todo change name to ResourceType
         public Type Resource => typeof(AzureDevOpsConfigurationOverrideResource);
         
         public Type Model => typeof(AzureDevOpsConfigurationOverride);
