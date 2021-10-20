@@ -10,10 +10,10 @@ using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.Resources.Configuration;
 using Octopus.Server.Extensibility.Web.Extensions;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 {
-    [ApiController]
     class AzureDevOpsConnectivityCheckAction : SystemScopedApiController
     {
         private readonly IAzureDevOpsConfigurationStore configurationStore;
@@ -25,8 +25,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
             this.adoApiClient = adoApiClient;
         }
 
+        [SwaggerOperation(
+            Summary = "Checks the AzureDevOps connection.",
+            OperationId = "createAzureDevOpsConnectivityCheck"),
+        ]
         [HttpPost(AzureDevOpsIssueTrackerApi.ApiConnectivityCheck)]
-        public async Task<ConnectivityCheckResponse> Execute(ConnectionCheckData requestData, CancellationToken cancellationToken)
+        public async Task<ConnectivityCheckResponse> Execute([FromBody]
+            [SwaggerRequestBody("The connection check data")] ConnectionCheckData requestData, CancellationToken cancellationToken)
         {
             var connectivityCheckResponse = new ConnectivityCheckResponse();
 
