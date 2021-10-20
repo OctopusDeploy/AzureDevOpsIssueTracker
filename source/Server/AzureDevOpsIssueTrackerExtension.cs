@@ -31,8 +31,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
 
             builder.RegisterType<AzureDevOpsConfigurationSettings>()
                 .As<IAzureDevOpsConfigurationSettings>()
-                .As<IHasConfigurationSettings>()
-                .As<IHasConfigurationSettingsResource>()
+                .As<IHasConfigurationSettingsAsync>()
+                .As<IHasConfigurationSettingsResourceAsync>()
                 .As<IContributeMappings>()
                 .InstancePerLifetimeScope();
 
@@ -52,10 +52,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
             builder.RegisterType<AdoApiClient>()
                 .As<IAdoApiClient>()
                 .InstancePerLifetimeScope();
-
-            builder.RegisterType<AzureDevOpsConnectivityCheckAction>()
-                .AsSelf()
-                .InstancePerDependency();
 
             builder.RegisterType<AzureDevOpsIssueTrackerHomeLinksContributor>()
                 .As<IHomeLinksContributor>()

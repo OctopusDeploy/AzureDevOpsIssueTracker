@@ -2,7 +2,7 @@
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
-    interface IAzureDevOpsConfigurationSettings : IHasConfigurationSettings
+    interface IAzureDevOpsConfigurationSettings : IHasConfigurationSettingsAsync
     {
     }
 }

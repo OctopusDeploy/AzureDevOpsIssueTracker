@@ -1,16 +1,17 @@
-﻿using Octopus.Data.Model;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Octopus.Data.Model;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
-    interface IAzureDevOpsConfigurationStore : IExtensionConfigurationStore<AzureDevOpsConfiguration>
+    interface IAzureDevOpsConfigurationStore : IExtensionConfigurationStoreAsync<AzureDevOpsConfiguration>
     {
-        string? GetBaseUrl();
-        void SetBaseUrl(string? baseUrl);
-
-        SensitiveString? GetPersonalAccessToken();
-        void SetPersonalAccessToken(SensitiveString? value);
-        string? GetReleaseNotePrefix();
-        void SetReleaseNotePrefix(string? releaseNotePrefix);
+        Task<string?> GetBaseUrl(CancellationToken cancellationToken);
+        Task SetBaseUrl(string? baseUrl, CancellationToken cancellationToken);
+        Task<SensitiveString?> GetPersonalAccessToken(CancellationToken cancellationToken);
+        Task SetPersonalAccessToken(SensitiveString? value, CancellationToken cancellationToken);
+        Task<string?> GetReleaseNotePrefix(CancellationToken cancellationToken);
+        Task SetReleaseNotePrefix(string? releaseNotePrefix, CancellationToken cancellationToken);
     }
 }

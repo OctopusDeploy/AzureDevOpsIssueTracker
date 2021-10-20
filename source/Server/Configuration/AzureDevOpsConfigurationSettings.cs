@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using Octopus.Data.Model;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 using Octopus.Server.Extensibility.HostServices.Mapping;
@@ -6,7 +8,7 @@ using Octopus.Server.Extensibility.HostServices.Mapping;
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
     class AzureDevOpsConfigurationSettings :
-        ExtensionConfigurationSettings<AzureDevOpsConfiguration, AzureDevOpsConfigurationResource, IAzureDevOpsConfigurationStore>,
+        ExtensionConfigurationSettingsAsync<AzureDevOpsConfiguration, AzureDevOpsConfigurationResource, IAzureDevOpsConfigurationStore>,
         IAzureDevOpsConfigurationSettings
     {
         public AzureDevOpsConfigurationSettings(IAzureDevOpsConfigurationStore configurationDocumentStore) : base(configurationDocumentStore)
@@ -19,20 +21,23 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 
         public override string Description => "Azure DevOps Issue Tracker settings";
 
-        public override IEnumerable<IConfigurationValue> GetConfigurationValues()
+        public override async IAsyncEnumerable<IConfigurationValue> GetConfigurationValues([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var isEnabled = ConfigurationDocumentStore.GetIsEnabled();
+            var isEnabled = await ConfigurationDocumentStore.GetIsEnabled(cancellationToken);
             yield return new ConfigurationValue<bool>("Octopus.IssueTracker.AzureDevOpsIssueTracker", isEnabled,
                 isEnabled, "Is Enabled");
-            yield return new ConfigurationValue<string?>("Octopus.IssueTracker.AzureDevOpsBaseUrl", ConfigurationDocumentStore.GetBaseUrl(),
-                isEnabled && !string.IsNullOrWhiteSpace(ConfigurationDocumentStore.GetBaseUrl()),
+            var baseUrl = await ConfigurationDocumentStore.GetBaseUrl(cancellationToken);
+            yield return new ConfigurationValue<string?>("Octopus.IssueTracker.AzureDevOpsBaseUrl", baseUrl,
+                isEnabled && !string.IsNullOrWhiteSpace(baseUrl),
                 AzureDevOpsConfigurationResource.BaseUrlDisplayName);
+            var personalAccessToken = await ConfigurationDocumentStore.GetPersonalAccessToken(cancellationToken);
             yield return new ConfigurationValue<SensitiveString?>("Octopus.IssueTracker.AzureDevOpsPersonalAccessToken",
-                ConfigurationDocumentStore.GetPersonalAccessToken(),
+                personalAccessToken,
                 false, "Azure DevOps Personal Access Token");
+            var releaseNotePrefix = await ConfigurationDocumentStore.GetReleaseNotePrefix(cancellationToken);
             yield return new ConfigurationValue<string?>("Octopus.IssueTracker.AzureDevOpsReleaseNotePrefix",
-                ConfigurationDocumentStore.GetReleaseNotePrefix(),
-                isEnabled && !string.IsNullOrWhiteSpace(ConfigurationDocumentStore.GetReleaseNotePrefix()), "AzureDevOps Release Note Prefix");
+                releaseNotePrefix,
+                isEnabled && !string.IsNullOrWhiteSpace(releaseNotePrefix), "AzureDevOps Release Note Prefix");
         }
 
         public override void BuildMappings(IResourceMappingsBuilder builder)
