@@ -14,7 +14,7 @@
     <PackageReference Include="NSubstitute" Version="3.1.0" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
-    <PackageReference Include="Octopus.Diagnostics" Version="2.1.2" />
+    <PackageReference Include="Octopus.Diagnostics" Version="2.1.106" />
     <PackageReference Include="TeamCity.VSTest.TestAdapter" Version="1.0.27" />
   </ItemGroup>
 
